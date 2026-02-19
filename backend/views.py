@@ -6,32 +6,47 @@ from django_filters.rest_framework import DjangoFilterBackend
 from django.utils import timezone
 from .models import *
 from .serializers import *
+from rest_framework.permissions import AllowAny
 
 class LoginView(APIView):
+    # On autorise tout le monde à essayer de se connecter
+    permission_classes = [AllowAny] 
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
 
         try:
             user = TableUtilisateur.objects.get(username=username)
+            print(f"Utilisateur trouvé : {user.username}") # DEBUG
 
-            if check_password(password, user.password):
+            is_correct = check_password(password, user.password)
+            print(f"Mot de passe valide ? {is_correct}") # DEBUG
+
+            if is_correct:
                 if user.statut == 'Off':
                     return Response({"error": "Compte désactivé"}, status=status.HTTP_403_FORBIDDEN)
                 
-                # Optionnel : Mettre à jour la dernière connexion
+                # Mise à jour de la date de connexion
                 user.derniereconnection = timezone.now()
                 user.save(update_fields=['derniereconnection'])
 
+                # On prépare uniquement les données de profil
+                user_data = {
+                    "id": user.id,
+                    "username": user.username,
+                    "fullname": f"{user.prenom} {user.nom}",
+                    "role": user.role.role if user.role else "Utilisateur",
+                    "photo": request.build_absolute_uri(user.photo.url) if user.photo else None
+                }
+
+                # On renvoie juste l'utilisateur, pas de tokens !
                 return Response({
-                    "user": {
-                        "username": user.username,
-                        "nom": user.nom,
-                        "prenom": user.prenom,
-                        "role": user.role.role if user.role else "Utilisateur"
-                    }
+                    "user": user_data,
+                    "message": "Connexion réussie"
                 }, status=status.HTTP_200_OK)
             
+            # Si le mot de passe est faux
             return Response({"error": "Identifiants incorrects"}, status=status.HTTP_401_UNAUTHORIZED)
             
         except TableUtilisateur.DoesNotExist:

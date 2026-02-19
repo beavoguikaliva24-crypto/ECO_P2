@@ -23,6 +23,7 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
+      console.log("Envoi des identifiants :", { username, password });
       // Appel à ton API Django (LoginView)
       const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login/`, {
         username,

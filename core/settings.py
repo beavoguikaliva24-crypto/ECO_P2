@@ -56,12 +56,14 @@ INSTALLED_APPS = [
     'django_filters',
 ]
 
-# 2. Configure DRF pour utiliser JWT
-#REST_FRAMEWORK = {
-#    'DEFAULT_AUTHENTICATION_CLASSES': (
-#        'rest_framework_simplejwt.authentication.JWTAuthentication',
-#    )
-#}
+REST_FRAMEWORK = {
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny', # Accès libre sans token
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication', # Pour l'admin Django
+    ],
+}
 
 # 3. Paramètres SimpleJWT (Optionnel mais recommandé)
 #SIMPLE_JWT = {

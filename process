@@ -48,12 +48,10 @@ git commit -m "Initial commit: Eco1 Backend et Frontend avec Auth personnalisée
 git push origin main
 
 
-Method Not Allowed: /api/token/
-[19/Feb/2026 12:14:36] "GET /api/token/ HTTP/1.1" 405 7706 
+npm install lucide-vue-next
 
-[19/Feb/2026 12:38:14] "POST /api/login/ HTTP/1.1" 401 35
-Unauthorized: /api/token/
-[19/Feb/2026 12:39:42] "POST /api/token/ HTTP/1.1" 401 63
 
-Unauthorized: /api/login/
-[19/Feb/2026 12:52:57] "POST /api/login/ HTTP/1.1" 401 35
+from backend.models import TableUtilisateur
+u = TableUtilisateur.objects.get(username="admin")
+u.password = "1234" # Assurez-vous que votre méthode save() gère le hachage du mot de passe
+u.save() # Ici le hachage se fera grâce à ta méthode save()

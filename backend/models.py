@@ -96,7 +96,6 @@ class TableUtilisateur(models.Model):
     derniereconnection = models.DateTimeField(null=True, blank=True, verbose_name='Dernière connexion') 
     photo = models.ImageField(upload_to='photousers/', null=True, blank=True, verbose_name="photo")
     # Champs obligatoires pour Django Auth
-    statut = models.CharField(max_length=3, choices=[('On', 'Actif'), ('Off', 'Inactif')], default='On')
 
     def save(self, *args, **kwargs):
         # Cette condition vérifie si le mot de passe n'est pas déjà haché
