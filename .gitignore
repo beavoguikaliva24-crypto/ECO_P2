@@ -1,0 +1,16 @@
+# --- Python / Django ---
+backend/venv/
+backend/__pycache__/
+backend/*.sqlite3
+backend/.env
+
+# --- Node / Next.js ---
+frontend/node_modules/
+frontend/.next/
+frontend/out/
+frontend/.env*.local
+frontend/.env.local
+
+# --- OS spécifiques ---
+.DS_Store
+Thumbs.db

@@ -1,0 +1,61 @@
+python -m venv venv
+source venv/bin/activate  # Sur Windows: venv\Scripts\activate
+
+pip install django djangorestframework django-cors-headers
+pip install djangorestframework django-cors-headers django-filter
+pip install django-filter
+pip install djangorestframework-simplejwt
+pip uninstall djangorestframework-simplejwt
+
+django-admin startproject core .
+
+django-admin startapp backend
+
+npx create-next-app@latest frontend
+
+cd frontend
+npm install lucide-react react-hot-toast axios
+npm install -D daisyui@latest tailwindcss postcss autoprefixer
+npx tailwindcss init -p
+
+pip install Pillow
+ pip install django-filter
+ pip install djangorestframework-simplejwt
+
+Initialisez Git et envoyez le code :
+    Bash
+    git init
+    git add .
+    git commit -m "Initial commit: Django + Next.js setup"
+
+Sur GitHub, créez un nouveau dépôt vide (sans README ni licence), puis liez-le :
+    Bash
+    git remote add origin https://github.com/VOTRE_NOM/VOTRE_PROJET.git "Une seule fois	Pour dire à votre PC où se trouve le dépôt GitHub."
+    git branch -M main
+    git push -u origin main
+
+git init                            "Une seule fois	Pour transformer votre dossier en projet Git."
+git status                          "Vérifier ce qui a changé (Optionnel mais recommandé) "
+git add .                           "À chaque modif	Pour sélectionner vos changements."
+git commit -m "mise a jour"         "À chaque modif	Pour enregistrer l'historique localement."
+git push origin main                "Souvent	Pour sauvegarder votre travail sur Internet (GitHub)."
+
+# Dans le dossier backend avec venv activé
+pip freeze > requirements.txt
+
+# Retour à la racine eco1
+cd ..
+git add .
+git commit -m "UI: Création du layout Dashboard avec Sidebar et Stats"
+git push origin main
+
+
+Method Not Allowed: /api/token/
+[19/Feb/2026 12:14:36] "GET /api/token/ HTTP/1.1" 405 7706 
+
+[19/Feb/2026 12:38:14] "POST /api/login/ HTTP/1.1" 401 35
+Unauthorized: /api/token/
+[19/Feb/2026 12:39:42] "POST /api/token/ HTTP/1.1" 401 63
+
+Unauthorized: /api/login/
+[19/Feb/2026 12:52:57] "POST /api/login/ HTTP/1.1" 401 35
