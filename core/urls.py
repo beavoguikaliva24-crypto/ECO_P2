@@ -15,8 +15,24 @@ Including another URLconf
     2. Add a URL to urlpatterns:  path('blog/', include('blog.urls'))
 """
 from django.contrib import admin
-from django.urls import path
+from django.urls import path, include
+from django.conf import settings
+from django.conf.urls.static import static
+from backend.views import *
+from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    # Inclure les urls de ton application backend
+    path('api/', include('backend.urls')),
+    # Remplace TokenObtainPairView par ta LoginView
+    path('api/login/', LoginView.as_view(), name='login_custom'), 
+    # Route pour obtenir le Token (Login)
+    #path('api/token/', TokenObtainPairView.as_view(), name='token_obtain_pair'),
+    # Route pour rafraîchir le Token
+    #path('api/token/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
 ]
+
+# Très important pour afficher les photos média en développement
+if settings.DEBUG:
+    urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

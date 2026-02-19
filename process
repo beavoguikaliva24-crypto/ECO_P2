@@ -3,7 +3,8 @@ source venv/bin/activate  # Sur Windows: venv\Scripts\activate
 
 pip install django djangorestframework django-cors-headers
 pip install djangorestframework django-cors-headers django-filter
-pip install django-filter
+pip install Pillow django-filter
+
 pip install djangorestframework-simplejwt
 pip uninstall djangorestframework-simplejwt
 
@@ -18,9 +19,6 @@ npm install lucide-react react-hot-toast axios
 npm install -D daisyui@latest tailwindcss postcss autoprefixer
 npx tailwindcss init -p
 
-pip install Pillow
- pip install django-filter
- pip install djangorestframework-simplejwt
 
 Initialisez Git et envoyez le code :
     Bash
@@ -46,7 +44,7 @@ pip freeze > requirements.txt
 # Retour à la racine eco1
 cd ..
 git add .
-git commit -m "UI: Création du layout Dashboard avec Sidebar et Stats"
+git commit -m "Initial commit: Eco1 Backend et Frontend avec Auth personnalisée"
 git push origin main
 
 

@@ -11,6 +11,8 @@ https://docs.djangoproject.com/en/6.0/ref/settings/
 """
 
 from pathlib import Path
+from datetime import timedelta # À ajouter en haut du fichier
+import os
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -25,8 +27,17 @@ SECRET_KEY = 'django-insecure-nfgaaps4=7h)spw&e2sq%wi^f#bq9_%jw0by@_1&c*y_s0q30w
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*']  # Permet toutes les adresses (à utiliser avec précaution en production)
+# Autorise ton frontend local (et plus tard ton URL Vercel)
+# 2. Pour que Next.js puisse communiquer avec Django
+CORS_ALLOW_ALL_ORIGINS = True  # Notez bien le nom : ALLOW_ALL_ORIGINS Permet toutes les origines (à utiliser avec précaution en production)
 
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:3000", # Ton frontend local 
+    "http://127.0.0.1:3000", # Alternative pour localhost
+    "http://beapc:3000", # Si tu utilises Docker et que ton frontend s'appelle "beapc" dans le réseau Docker
+    "http://10.15.8.105:3000", # Ton IP doit être ici
+] 
 
 # Application definition
 
@@ -37,12 +48,38 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+        
+    'backend.apps.BackendConfig', # Ton application
+    'corsheaders',
+    'rest_framework', # Si tu utilises Django Rest Framework
+    #'rest_framework_simplejwt',
+    'django_filters',
 ]
 
+# 2. Configure DRF pour utiliser JWT
+#REST_FRAMEWORK = {
+#    'DEFAULT_AUTHENTICATION_CLASSES': (
+#        'rest_framework_simplejwt.authentication.JWTAuthentication',
+#    )
+#}
+
+# 3. Paramètres SimpleJWT (Optionnel mais recommandé)
+#SIMPLE_JWT = {
+#    'ACCESS_TOKEN_LIFETIME': timedelta(minutes=60),
+#    'REFRESH_TOKEN_LIFETIME': timedelta(days=1),
+#    'ROTATE_REFRESH_TOKENS': True,
+#    'ALGORITHM': 'HS256',
+#    'SIGNING_KEY': SECRET_KEY,
+#    'AUTH_HEADER_TYPES': ('Bearer',),
+#}
+
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
+    'django.middleware.common.CommonMiddleware',
+
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
+    #'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -115,3 +152,7 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = 'static/'
+
+# Dossier où Django stockera les fichiers sur le disque
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
