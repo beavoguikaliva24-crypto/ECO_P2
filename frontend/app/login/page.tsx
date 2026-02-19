@@ -8,6 +8,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [shake, setShake] = useState(false);
   const router = useRouter();
 
   // Empêcher l'accès si déjà connecté
@@ -30,20 +31,43 @@ export default function LoginPage() {
         password
       });
 
-      // On stocke l'objet utilisateur renvoyé par Django
-      // Contient: username, nom, prenom, role (selon ta vue)
-      localStorage.setItem('user', JSON.stringify(res.data.user));
+      // Dans handleLogin, après la requête axios réussie
+const userData = res.data.user || res.data; // Prend 'user' s'il existe, sinon l'objet entier
+
+localStorage.setItem('user', JSON.stringify(userData));
       
-      toast.success(`Bienvenue ${res.data.user.prenom} !`);
-      
-      // Redirection immédiate
-      router.replace('/dashboard');
+     // On vérifie plusieurs clés possibles (prenom, first_name, username)
+const displayName = userData.prenom || userData.first_name || userData.username || "Utilisateur";
+
+toast.success(`Bienvenue ${displayName} !`);
+
+// Redirection
+router.replace('/dashboard');
       
     } catch (error: any) {
-      // Gestion des erreurs (Identifiants incorrects, Compte inactif, etc.)
-      const message = error.response?.data?.error || "Erreur de connexion";
-      toast.error(message);
-      console.error("Login Error:", error);
+      console.log("Détails de l'erreur backend:", error.response?.data);
+      // 1. On récupère le message d'erreur précis envoyé par Django
+      // Django renvoie souvent soit { error: "..." } soit { detail: "..." }
+      const errorMessage = error.response?.data?.error || 
+                           error.response?.data?.detail || 
+                           "Identifiants invalides";
+
+      // 2. On affiche le toast d'erreur
+      toast.error(errorMessage, {
+        duration: 4000,
+        position: 'top-right',
+        style: {
+          borderRadius: '10px',
+          background: '#333',
+          color: '#fff',
+        },
+      });
+
+      // 3. Shake animation
+      setShake(true);
+      setTimeout(() => setShake(false), 500);
+
+      console.error("Login Error Status:", error.response?.status);
     } finally {
       setLoading(false);
     }
@@ -57,7 +81,7 @@ export default function LoginPage() {
           <p className="text-gray-500 mt-2">Gestion Scolaire - Connexion</p>
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-6">
+        <form onSubmit={handleLogin} className={`space-y-6 ${shake ? 'animate-shake' : ''}`}>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-1">
               Nom d'utilisateur

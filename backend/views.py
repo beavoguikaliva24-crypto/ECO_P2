@@ -1,3 +1,4 @@
+from rest_framework import permissions
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import viewsets, filters,status
@@ -80,6 +81,8 @@ class UtilisateurViewSet(viewsets.ModelViewSet):
 class EleveViewSet(viewsets.ModelViewSet):
     queryset = TableEleve.objects.all()
     serializer_class = EleveSerializer
+    # C'EST CETTE LIGNE QUI PERMET D'ENREGISTRER SANS TOKEN :
+    permission_classes = [permissions.AllowAny]
     # Ajout de recherche par nom ou matricule
     filter_backends = [filters.SearchFilter]
     # 2. On définit les champs sur lesquels on peut chercher
