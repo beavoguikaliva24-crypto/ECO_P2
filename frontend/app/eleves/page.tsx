@@ -181,10 +181,10 @@ export default function ElevesPage() {
                 </div>                      
 
                 {/* CONTENEUR TABLEAU SCROLLABLE */}
-                <div className="flex-1 bg-white rounded-2xl shadow-sm border border-slate-200 overflow-hidden flex flex-col">
-                    <div className="overflow-y-auto flex-1 custom-scrollbar relative">
-                        <table className="w-5/5 text-left border-collapse">
-                        <thead className="sticky top-0 z-10 bg-slate-50 border-b border-slate-200">
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
+          <div className="overflow-x-auto overflow-y-auto">
+            <table className="w-full text-left border-collapse">
+              <thead className="bg-slate-50/80 sticky top-0 z-10 border-b border-slate-100 backdrop-blur-md">
                             <tr className="text-slate-500 text-xs uppercase font-bold">
                                 <th className="p-4 bg-slate-50">Élève</th>
                                 <th className="p-4 text-center bg-slate-50">Matricule</th>
@@ -323,4 +323,4 @@ function StatCard({ icon, label, value, total, color }: any) {
             </div>
         </div>
     );
-};
+}

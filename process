@@ -44,7 +44,7 @@ pip freeze > requirements.txt
 # Retour à la racine eco1
 cd ..
 git add .
-git commit -m "dashboard et les eleves"
+git commit -m "lles changements récents dans frontend (affectations, eleves) et backend (models, serializers, views)"
 git push origin main
 
 
