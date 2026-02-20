@@ -7,7 +7,8 @@ import {
   School, 
   Wallet, 
   GraduationCap,
-  Settings 
+  ChevronLeft,    // Ajouté
+  ChevronRight    // Ajouté
 } from 'lucide-react';
 
 const menuItems = [
@@ -18,24 +19,44 @@ const menuItems = [
   { name: 'Scolarités', path: '/scolarites', icon: GraduationCap },
 ];
 
-export default function Sidebar() {
+// Définition de l'interface pour recevoir les props du Layout
+interface SidebarProps {
+  isCollapsed: boolean;
+  setIsCollapsed: (value: boolean) => void;
+}
+
+export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
   const pathname = usePathname();
 
   return (
-    <aside className="w-64 bg-slate-900 h-screen text-white flex flex-col shadow-xl">
+    // On retire "w-50" car la largeur est gérée par le parent DashboardLayout
+    <aside className="relative flex flex-col h-screen text-white shadow-xl bg-slate-900 w-full transition-all duration-300">
+      
+      {/* Bouton pour réduire/agrandir : Positionné à cheval sur le bord droit */}
+      <button 
+        onClick={() => setIsCollapsed(!isCollapsed)}
+        className="absolute -right-3 top-10 bg-blue-600 text-white rounded-full p-1 shadow-md z-50 hover:scale-110 transition-transform"
+      >
+        {isCollapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
+      </button>
+
       {/* HEADER : Logo et Nom */}
-      <div className="p-6">
-        <div className="flex items-center justify-center gap-3 py-4 bg-slate-800/40 rounded-2xl border border-slate-700/50">
-          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-900/20">
+      <div className="p-3">
+        <div className={`flex items-center justify-center gap-3 py-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 ${isCollapsed ? 'px-0' : 'px-2'}`}>
+          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-900/20 shrink-0">
             <School size={22} className="text-white" />
           </div>
-          <span className="text-xl font-black tracking-tighter text-blue-400">ECO1 - PRO</span>
+          {/* On cache le texte du logo si réduit */}
+          {!isCollapsed && <span className="font-black tracking-tighter text-blue-400 whitespace-nowrap">ECO1 - PRO</span>}
         </div>
       </div>
 
-      {/* NAVIGATION : Menu principal (prend l'espace disponible) */}
-      <nav className="flex-1 px-4 space-y-2 overflow-y-auto custom-scrollbar">
-        <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Menu Principal</p>
+      {/* NAVIGATION : Menu principal */}
+      <nav className="flex-1 px-3 mt-4 space-y-2 overflow-y-auto custom-scrollbar">
+        {!isCollapsed && (
+            <p className="px-4 text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-4">Menu Principal</p>
+        )}
+
         {menuItems.map((item) => {
           const Icon = item.icon;
           const isActive = pathname === item.path;
@@ -44,32 +65,39 @@ export default function Sidebar() {
             <Link 
               key={item.path} 
               href={item.path}
+              title={isCollapsed ? item.name : ""} // Affiche le nom au survol si réduit
               className={`flex items-center gap-3 p-3.5 rounded-xl transition-all duration-300 group ${
                 isActive 
                   ? 'bg-blue-600 text-white shadow-lg shadow-blue-900/40' 
                   : 'text-slate-400 hover:bg-slate-800/80 hover:text-white'
-              }`}
+              } ${isCollapsed ? 'justify-center' : ''}`}
             >
               <Icon 
                 size={20} 
                 strokeWidth={isActive ? 2.5 : 2} 
                 className={isActive ? 'animate-pulse' : 'group-hover:scale-110 transition-transform'}
               />
-              <span className="font-semibold text-sm">{item.name}</span>
+              {/* Masquage conditionnel du texte */}
+              {!isCollapsed && <span className="font-semibold text-sm whitespace-nowrap">{item.name}</span>}
             </Link>
           );
         })}
       </nav>
 
-      {/* FOOTER : Le nouveau pied de page flexible */}
-      <div className="p-4 mt-auto border-t border-slate-800">
+      {/* FOOTER : Version stable */}
+      <div className="p-3 mt-auto border-t border-slate-800">
         <div className="p-4 bg-gradient-to-br from-slate-800/50 to-slate-900/50 rounded-2xl border border-slate-700/30">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-[10px] font-bold text-slate-500 uppercase italic">Version Stable</span>
-            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
-          </div>
-          <p className="text-xs text-blue-400 font-mono text-center">v1.0.2 • 2026</p>
-          <p className="text-[9px] text-slate-600 text-center mt-1 uppercase tracking-tighter">Propulsé par ECO-SYS</p>
+          {!isCollapsed ? (
+            <>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-[10px] font-bold text-slate-500 uppercase italic">Version Stable</span>
+                <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
+              </div>
+              <p className="text-xs text-blue-400 font-mono text-center">v1.0.2 • 2026</p>
+            </>
+          ) : (
+            <div className="w-2 h-2 bg-green-500 rounded-full animate-ping mx-auto"></div>
+          )}
         </div>
       </div>
     </aside>

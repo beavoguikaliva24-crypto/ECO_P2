@@ -44,7 +44,7 @@ pip freeze > requirements.txt
 # Retour à la racine eco1
 cd ..
 git add .
-git commit -m "gestion du login et du register et dashboard"
+git commit -m "dashboard et les eleves"
 git push origin main
 
 
