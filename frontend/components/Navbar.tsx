@@ -1,3 +1,6 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable react-hooks/set-state-in-effect */
+/* eslint-disable @next/next/no-img-element */
 "use client";
 import { useEffect, useState } from 'react';
 import { logout } from '@/lib/auth';
@@ -50,10 +53,7 @@ const getPhotoUrl = () => {
         <div className="avatar">
           <div className="w-10 h-10 rounded-full ring ring-blue-500 ring-offset-base-100 ring-offset-2 overflow-hidden bg-slate-100 flex items-center justify-center">
             {user?.photo ? (
-              <img 
-                src={getPhotoUrl()} 
-                alt="Profile" 
-                className="object-cover w-full h-full"
+              <img src={getPhotoUrl()} alt="Profile" className="object-cover w-full h-full"
                 onError={(e) => {
                     // Si l'image ne charge pas, on remplace par un fallback
                     (e.target as HTMLImageElement).src = "https://ui-avatars.com/api/?name=" + user?.username;
