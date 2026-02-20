@@ -44,6 +44,8 @@ export default function ElevesPage() {
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
     const currentItems = eleves.slice(indexOfFirstItem, indexOfLastItem);
     const totalPages = Math.ceil(eleves.length / itemsPerPage);
+    //const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedEleve, setSelectedEleve] = useState(null);
 
     const stats = {
         total: eleves.length,
@@ -116,7 +118,7 @@ export default function ElevesPage() {
     };
 
     const handleEdit = (eleve: any) => {
-        setCurrentEleve(eleve);
+        setSelectedEleve(eleve);
         setIsModalOpen(true);
     };
 
