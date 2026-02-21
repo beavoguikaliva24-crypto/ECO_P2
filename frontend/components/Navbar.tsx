@@ -14,12 +14,6 @@ interface NavbarProps {
 export default function Navbar({ onMenuClick }: NavbarProps) {
   const [user, setUser] = useState<any>(null);
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false); // Pour les petits écrans
-  
-    const toggleMenu = () => {
-      setIsMenuOpen(!isMenuOpen);
-    }
-
 useEffect(() => {
   const loadUser = () => {
     const userData = localStorage.getItem('user');

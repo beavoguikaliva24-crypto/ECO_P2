@@ -5,14 +5,35 @@ import { Plus, Search, FileText, Download, Users, GraduationCap, Calendar, Trend
 import AffectationModal from '../affectations/AffectationModal';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { UserOptions } from 'jspdf-autotable';
 import DashboardLayout from '../dashboard/layout';
 import { toast } from 'react-hot-toast';
 
+interface EleveDetails {
+  fullname?: string;
+  matricule?: string;
+  genre?: string;
+  sexe?: string;
+  jour_naissance?: number;
+  mois_naissance?: number;
+  annee_naissance?: number;
+  lieu_naissance?: string;
+}
+
+interface Affectation {
+  id: number;
+  eleve_details?: EleveDetails;
+  classe_nom?: string;
+  annee_nom?: string;
+  niveau_classe?: string;
+  option_classe?: string;
+  etat_aff?: string;
+}
+
 export default function AffectationsPage() {
-    const [affectations, setAffectations] = useState([]);
+    const [affectations, setAffectations] = useState<Affectation[]>([]);
     const [isModalOpen, setIsModalOpen] = useState(false);
-    const [selectedAff, setSelectedAff] = useState(null);
+    const [selectedAff, setSelectedAff] = useState<Affectation | null>(null);
     const NIVEAU_CHOIX = [
         { value: 'cre', label: 'Crèche' }, { value: 'mat', label: 'Maternel' },
         { value: 'pri', label: 'Primaire' }, { value: 'clg', label: 'Collège' },
@@ -24,11 +45,11 @@ export default function AffectationsPage() {
         { value: 'lit', label: 'Littéraires' },{ value: 'aut', label: 'Autres' },
 
     ];
-const getNiveauLabel = (value) => {
+const getNiveauLabel = (value: string) => {
   return NIVEAU_CHOIX.find(n => n.value === value)?.label || value;
 };
 
-const getOptionLabel = (value) => {
+const getOptionLabel = (value: string) => {
   return OPTION_CHOIX.find(o => o.value === value)?.label || value;
 };
   
@@ -56,7 +77,7 @@ const [filterOption, setFilterOption] = useState("");
 
 // 2. LOGIQUE DE FILTRAGE
 const filteredData = useMemo(() => {
-  return affectations.filter((aff: any) => {
+  return affectations.filter((aff: Affectation) => {
     // Recherche par nom ou matricule
     const matchesSearch = 
       aff.eleve_details?.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -89,12 +110,12 @@ const filteredData = useMemo(() => {
   // 5. STATISTIQUES
   const stats = useMemo(() => ({
     total: filteredData.length,
-    nouveaux: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'nouv').length,
-    admis: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'adm').length,
-    redoublants: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'red').length,
-    cdt: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'cdt').length,
-    autres: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'aut').length,
-    classes: new Set(filteredData.map((a: any) => a.classe_nom)).size,
+    nouveaux: filteredData.filter((a: Affectation) => a.etat_aff?.toLowerCase() === 'nouv').length,
+    admis: filteredData.filter((a: Affectation) => a.etat_aff?.toLowerCase() === 'adm').length,
+    redoublants: filteredData.filter((a: Affectation) => a.etat_aff?.toLowerCase() === 'red').length,
+    cdt: filteredData.filter((a: Affectation) => a.etat_aff?.toLowerCase() === 'cdt').length,
+    autres: filteredData.filter((a: Affectation) => a.etat_aff?.toLowerCase() === 'aut').length,
+    classes: new Set(filteredData.map((a: Affectation) => a.classe_nom)).size,
   }), [filteredData]);
 
   const handleCloseModal = () => {
@@ -107,6 +128,7 @@ const filteredData = useMemo(() => {
     const data = filteredData.map(a => ({
       Matricule: a.eleve_details?.matricule,
       Eleve: a.eleve_details?.fullname,
+      Sexe: a.eleve_details?.genre || a.eleve_details?.sexe,
       Classe: a.classe_nom,
       Année: a.annee_nom,
       Statut: a.etat_aff
@@ -117,23 +139,148 @@ const filteredData = useMemo(() => {
     XLSX.writeFile(wb, "Affectations.xlsx");
   };
 
-  const exportToPDF = () => {
-    const doc = new jsPDF();
+ const exportToPDF = () => {
+  const doc = new jsPDF();
+  const pageWidth = doc.internal.pageSize.getWidth();
+  const pageHeight = doc.internal.pageSize.getHeight();
+  const logoUrl = "/Sans titre-2.jpg"; 
+
+  // --- 1. FONCTION DE STRUCTURE (FIXE SUR CHAQUE PAGE) ---
+  const drawFixedStructure = (pdfDoc: any) => {
+    try {
+      pdfDoc.saveGraphicsState();
+      pdfDoc.setGState(new pdfDoc.GState({ opacity: 0.1 }));
+      pdfDoc.addImage(logoUrl, 'JPEG', pageWidth/2 - 75, pageHeight/2 - 75, 150, 150);
+      pdfDoc.restoreGraphicsState();
+    } catch (e) {}
+
+    pdfDoc.setFontSize(9);
+    pdfDoc.setFont("helvetica", "bold");
+    pdfDoc.text("MEPUA", 10, 10);
+    pdfDoc.text("DCE : MATOTO", 10, 15);
+    pdfDoc.text("IRE : CONAKRY", 10, 20);
+    pdfDoc.text("REPUBLIQUE DE GUINEE", pageWidth - 10, 10, { align: "right" });
+    pdfDoc.setFont("helvetica", "normal");
+    pdfDoc.text("Travail - Justice - Solidarité", pageWidth - 10, 15, { align: "right" });
+
+    try { pdfDoc.addImage(logoUrl, 'JPEG', pageWidth/2 - 12, 5, 24, 24); } catch (e) {}
+    
+    pdfDoc.setDrawColor(0);
+    pdfDoc.line(10, 30, pageWidth - 10, 30);
+    pdfDoc.line(10, pageHeight - 20, pageWidth - 10, pageHeight - 20);
+
+    pdfDoc.setFontSize(8);
+    pdfDoc.text("Groupe Scolaire ECO1 - Matoto - Conakry", 10, pageHeight - 15);
+    pdfDoc.text("Page " + pdfDoc.internal.getNumberOfPages(), pageWidth - 10, pageHeight - 15, { align: "right" });
+  };
+
+  // --- 2. GROUPER PAR ANNÉE ET CLASSE ---
+  const groupes = filteredData.reduce((acc: Record<string, Affectation[]>, curr) => {
+    const annee = curr.annee_nom || "Année Inconnue";
+    const classe = curr.classe_nom || "Sans Classe";
+    const cle = `${annee} | ${classe}`; // La clé magique
+    
+    if (!acc[cle]) acc[cle] = [];
+    acc[cle].push(curr);
+    return acc;
+  }, {});
+
+  const listeCles = Object.keys(groupes);
+
+  const formatDateNaissance = (details: EleveDetails | undefined) => {
+  // Récupération des valeurs numériques du modèle
+  const j = details?.jour_naissance; // de 0 à 31
+  const m = details?.mois_naissance; // de 0 à 12
+  const a = details?.annee_naissance; // 0 ou 1970+
+
+  const lieu = details?.lieu_naissance ? ` à ${details.lieu_naissance}` : '';
+
+  // Cas où rien n'est renseigné (tout est à 0 ou 0000)
+  if ((!a || a === 0) && (!m || m === 0) && (!j || j === 0)) return 'N/A';
+
+  let dateFormatee = "";
+
+  // 1. CAS ANNÉE SEULE (Jour et Mois sont à 0)
+  if (j === 0 && m === 0) {
+    dateFormatee = `${a}`;
+  } 
+  // 2. CAS MOIS / ANNÉE (Jour est à 0)
+  else if (j === 0) {
+    const moisPadded = (m ?? 0).toString().padStart(2, '0');
+    dateFormatee = `${moisPadded}/${a}`;
+  } 
+  // 3. CAS COMPLET (Tout est différent de 0)
+  else {
+    const jourPadded = (j ?? 0).toString().padStart(2, '0');
+    const moisPadded = (m ?? 0).toString().padStart(2, '0');
+    dateFormatee = `${jourPadded}/${moisPadded}/${a}`;
+  }
+
+  return `${dateFormatee}${lieu}`;
+};
+
+  // --- 3. BOUCLER SUR LES GROUPES ---
+  listeCles.forEach((cle, index) => {
+    const donneesGroupe = groupes[cle];
+    
+    // Stats pour ce groupe précis
+    const total = donneesGroupe.length;
+    const garcons = donneesGroupe.filter(a => a.eleve_details?.genre === 'M' || a.eleve_details?.sexe === 'M').length;
+    const filles = donneesGroupe.filter(a => a.eleve_details?.genre === 'F' || a.eleve_details?.sexe === 'F').length;
+
+    // Titre de la section (Année | Classe)
+    doc.setFontSize(14);
+    doc.setFont("helvetica", "bold");
+    doc.text(cle, pageWidth / 2, 40, { align: "center" });
+
     autoTable(doc, {
-      startY: 50,
-      head: [['Matricule', 'Nom Complet', 'Classe', 'Année', 'Statut']],
-      body: filteredData.map(a => [
+      startY: 45,
+      head: [['Matricule', 'Nom Complet', 'Sexe', 'Statut','Date et Lieu de Naissance']],
+      body: donneesGroupe.map(a => [
         a.eleve_details?.matricule || '-', 
         a.eleve_details?.fullname || '-', 
-        a.classe_nom || '-', 
-        a.annee_nom || '-',
-        a.etat_aff || '-'
+        a.eleve_details?.sexe ? (a.eleve_details.genre || a.eleve_details.sexe) : '-',
+        a.etat_aff || '-',
+       formatDateNaissance(a.eleve_details),// Appel de la fonction ici
       ]),
       theme: 'grid',
-      headStyles: { fillColor: [37, 99, 235] }
+      headStyles: { fillColor: [37, 99, 235] },
+      didDrawPage: () => drawFixedStructure(doc)
     });
-    doc.save("Affectations.pdf");
-  };
+
+    // Position après le tableau
+    let finalY = (doc as any).lastAutoTable.finalY + 15;
+
+    // Vérifier l'espace pour les stats et la signature
+    if (finalY > pageHeight - 60) {
+      doc.addPage();
+      drawFixedStructure(doc);
+      finalY = 40;
+    }
+
+    // Affichage des statistiques
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "bold");
+    const colWidth = (pageWidth - 20) / 4;
+    doc.text(`TOTAL : ${total}`, 15, finalY);
+    doc.text(`GARCONS : ${garcons}`, 15 + colWidth, finalY);
+    doc.text(`FILLES : ${filles}`, 15 + (colWidth * 2), finalY);
+    doc.text(`AUTRES : ${total - garcons - filles}`, 15 + (colWidth * 3), finalY);
+
+    // Direction
+    doc.setFontSize(12);
+    doc.text("LA DIRECTION", pageWidth / 2, finalY + 25, { align: "center" });
+    const textW = doc.getTextWidth("LA DIRECTION");
+    doc.line(pageWidth/2 - textW/2, finalY + 26, pageWidth/2 + textW/2, finalY + 26);
+
+    // Si ce n'est pas le dernier groupe, on change de page
+    if (index < listeCles.length - 1) {
+      doc.addPage();
+    }
+  });
+
+  doc.save("Rapport_Eco1_Global.pdf");
+};
 
   return (
     <DashboardLayout>
@@ -175,7 +322,7 @@ const filteredData = useMemo(() => {
   <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
     onChange={(e) => setFilterAnnee(e.target.value)}>
     <option value="">Toutes les années</option>
-    {[...new Set(affectations.map((a:any) => a.annee_nom))].map(an => <option key={an} value={an}>{an}</option>)}
+    {[...new Set(affectations.map((a: Affectation) => a.annee_nom))].map((an: string | undefined) => <option key={an} value={an}>{an}</option>)}
   </select>
 
 {/* Filtre Niveau */}
@@ -206,7 +353,7 @@ const filteredData = useMemo(() => {
   <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
     onChange={(e) => setFilterClasse(e.target.value)}>
     <option value="">Toutes les classes</option>
-    {[...new Set(affectations.map((a:any) => a.classe_nom))].map(cl => <option key={cl} value={cl}>{cl}</option>)}
+    {[...new Set(affectations.map((a: Affectation) => a.classe_nom))].map((cl: string | undefined) => <option key={cl} value={cl}>{cl}</option>)}
   </select>
 
   <div className="flex gap-2 border-l pl-4 border-slate-100">
@@ -233,7 +380,7 @@ const filteredData = useMemo(() => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {paginatedData.map((aff: any) => (
+                {paginatedData.map((aff: Affectation) => (
                   <tr key={aff.id} className="hover:bg-slate-200/50 transition-colors">
                     <td className="pl-4 pb-1 pt-1">
                       <div className="font-bold text-slate-700">{aff.eleve_details?.fullname}</div>
@@ -314,7 +461,14 @@ const filteredData = useMemo(() => {
   );
 }
 
-function StatCard({ title, value, icon, color }: any) {
+interface StatCardProps {
+  title: string;
+  value: number;
+  icon: React.ReactNode;
+  color: string;
+}
+
+function StatCard({ title, value, icon, color }: StatCardProps) {
   return (
     <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
       <div className={`p-2 rounded-xl ${color}`}>{icon}</div>

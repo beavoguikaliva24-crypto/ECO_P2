@@ -2,7 +2,11 @@
 import React, { useMemo } from 'react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Cell } from 'recharts';
 
-export default function StatEleve({ eleves = [] }) {
+interface Eleve {
+  sexe: 'M' | 'F' | 'O';
+}
+
+export default function StatEleve({ eleves = [] }: { eleves?: Eleve[] }) {
     const stats = useMemo(() => {
     const total = eleves.length;
     const garcons = eleves.filter(e => e.sexe === 'M').length;

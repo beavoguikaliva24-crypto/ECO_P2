@@ -6,13 +6,11 @@ import {
   Users, 
   School, 
   Wallet, 
-  UserPlus,
   LayersPlus,
   GraduationCap,
   ChevronLeft,    // Ajouté
   ChevronRight    // Ajouté
 } from 'lucide-react';
-import { register } from 'module';
 
 const menuItems = [
   { name: 'Dashboard', path: '/dashboard', icon: LayoutDashboard },

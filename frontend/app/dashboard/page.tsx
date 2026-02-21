@@ -35,7 +35,7 @@ export default function DashboardPage() {
       <div className="max-w-8xl mx-auto space-y-3">
         <div>
           <h1 className="text-2xl font-bold text-zinc-900">Tableau de Bord - Eco1</h1>
-          <p className="text-zinc-500">Statistiques en temps réel de l'établissement</p>
+          <p className="text-zinc-500">Statistiques en temps réel de l&apos;établissement</p>
         </div>
         
         {/* Ton code StatEleve corrigé s'affichera ici */}

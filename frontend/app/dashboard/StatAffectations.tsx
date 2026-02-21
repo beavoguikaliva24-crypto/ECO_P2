@@ -1,6 +1,6 @@
 "use client";
 import React, { useMemo, useState } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from 'recharts';
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 // Importez vos constantes ou définissez-les ici
 const NIVEAU_CHOIX = [
@@ -21,12 +21,18 @@ const OPTION_CHOIX = [
   { value: 'aut', label: 'Autres' },
 ];
 
-export default function StatAffectations({ affectations = [] }) {
+interface Affectation {
+  annee_nom: string;
+  option_classe: string;
+  niveau_classe: string;
+}
+
+export default function StatAffectations({ affectations = [] }: { affectations?: Affectation[] }) {
   const [selectedAnnee, setSelectedAnnee] = useState("");
 
   // Fonctions de traduction pour les graphiques
-  const getNiveauLabel = (val) => NIVEAU_CHOIX.find(n => n.value === val)?.label || val;
-  const getOptionLabel = (val) => OPTION_CHOIX.find(o => o.value === val)?.label || val;
+  const getNiveauLabel = (val: string) => NIVEAU_CHOIX.find(n => n.value === val)?.label || val;
+  const getOptionLabel = (val: string) => OPTION_CHOIX.find(o => o.value === val)?.label || val;
 
   const listeAnnees = useMemo(() => {
     const annees = affectations.map(a => a.annee_nom).filter(Boolean); // Utilisation de annee_nom simplifié
@@ -41,14 +47,14 @@ export default function StatAffectations({ affectations = [] }) {
 
   const stats = useMemo(() => {
     // 1. Par Année
-    const anneesMap = affectations.reduce((acc, a) => {
+    const anneesMap = affectations.reduce((acc: Record<string, number>, a) => {
       const label = a.annee_nom || "N/A";
       acc[label] = (acc[label] || 0) + 1;
       return acc;
     }, {});
 
     // 2. Par Option (Traduction du code en Label)
-    const optionsMap = dataFiltree.reduce((acc, a) => {
+    const optionsMap = dataFiltree.reduce((acc: Record<string, number>, a) => {
       const rawValue = a.option_classe || "aut";
       const label = getOptionLabel(rawValue);
       acc[label] = (acc[label] || 0) + 1;
@@ -56,7 +62,7 @@ export default function StatAffectations({ affectations = [] }) {
     }, {});
 
     // 3. Par Niveau (Traduction du code en Label)
-    const niveauxMap = dataFiltree.reduce((acc, a) => {
+    const niveauxMap = dataFiltree.reduce((acc: Record<string, number>, a) => {
       const rawValue = a.niveau_classe || "aut";
       const label = getNiveauLabel(rawValue);
       acc[label] = (acc[label] || 0) + 1;
@@ -96,7 +102,7 @@ export default function StatAffectations({ affectations = [] }) {
 }
 
 // Composant réutilisable pour éviter la répétition
-function ChartCard({ title, data, color }) {
+function ChartCard({ title, data, color }: { title: string; data: Array<{ name: string; total: number }>; color: string }) {
   return (
     <div className="bg-white rounded-2xl border border-zinc-200 shadow-sm">
       <h4 className="text-sm bg-gray-600 p-1 font-bold text-zinc-100 mb-2 uppercase text-center">{title}</h4>
