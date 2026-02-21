@@ -38,11 +38,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
       
       {/* Bouton pour réduire/agrandir : Positionné à cheval sur le bord droit */}
       <button 
-        onClick={() => setIsCollapsed(!isCollapsed)}
-        className="absolute -right-3 top-10 bg-blue-600 text-white rounded-full p-1 shadow-md z-50 hover:scale-110 transition-transform"
-      >
-        {isCollapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
-      </button>
+  onClick={() => setIsCollapsed(!isCollapsed)}
+  className="hidden lg:flex absolute -right-3 top-10 bg-blue-600 ... "
+>
+  {isCollapsed ? <ChevronRight size={16}/> : <ChevronLeft size={16}/>}
+</button>
 
       {/* HEADER : Logo et Nom */}
       <div className="p-3">
@@ -94,10 +94,11 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
           {!isCollapsed ? (
             <>
               <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-bold text-slate-500 uppercase italic">Version Stable</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase italic">Version Stable</span>
                 <div className="w-2 h-2 bg-green-500 rounded-full animate-ping"></div>
               </div>
               <p className="text-xs text-blue-400 font-mono text-center">v1.0.2 • 2026</p>
+              <p className="text-xs text-slate-300 font-mono text-center">Propulsée par MAXMA Tech Solutions</p>
             </>
           ) : (
             <div className="w-2 h-2 bg-green-500 rounded-full animate-ping mx-auto"></div>

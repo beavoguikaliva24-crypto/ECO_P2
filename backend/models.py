@@ -193,8 +193,10 @@ class TableEleve(models.Model):
 class TableClasse(models.Model):
     code_classe = models.CharField(max_length=10, unique=True, verbose_name="Code")
     lib_classe = models.CharField(max_length=50, verbose_name="Classe")
-    niveau_classe = models.ForeignKey(TableNiveau, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Niveau")
-    option_classe = models.ForeignKey(TableOption, on_delete=models.SET_NULL, null=True, blank=True, verbose_name="Option")
+    niveau_choix = [('cre','Crèche'),('mat','Maternel'), ('pri','Primaire'),('clg','Collège'),('lyc','Lycée'),('aut','Autres')]
+    niveau_classe = models.CharField(max_length=3, choices=niveau_choix, default='aut', null=True, blank=True, verbose_name="Niveau")
+    option_choix = [('se','Sciences Expérimentales'),('sm','Sciences Mathématiques'), ('ss','Sciences Sociales'),('sc','Scientifiques'),('lit','Littéraires'),('aut','Autres')]
+    option_classe = models.CharField(max_length=3, choices=option_choix, default='aut', null=True, blank=True, verbose_name="Option")
 
     class Meta:
         verbose_name = "Classe"
@@ -230,7 +232,8 @@ class TableAffectation(models.Model):
         verbose_name = "Affectation"
         verbose_name_plural = "Affectations"
         constraints = [
-            models.UniqueConstraint(fields=['eleve_aff', 'classe_aff', 'annee_aff'], name='unique_affectation')
+            models.UniqueConstraint(fields=['eleve_aff', 'classe_aff', 'annee_aff'], name='unique_affectation1'),
+            models.UniqueConstraint(fields=['eleve_aff', 'annee_aff'], name='unique_affectation2'),
         ]
 
 

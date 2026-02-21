@@ -43,13 +43,9 @@ class EleveSerializer(serializers.ModelSerializer):
         read_only_fields = ('matricule', 'fullname', 'date_naissance')
 
 class ClasseSerializer(serializers.ModelSerializer):
-    # Pour afficher le nom dans le JSON
-    niveau_nom = serializers.ReadOnlyField(source='niveau_classe.niveau')
-    option_nom = serializers.ReadOnlyField(source='option_classe.option')
-
     class Meta:
         model = TableClasse
-        fields = ['id', 'code_classe', 'lib_classe', 'niveau_classe', 'option_classe', 'niveau_nom', 'option_nom']
+        fields = ['id', 'code_classe', 'lib_classe', 'niveau_classe', 'option_classe']
 
 class FraisScolariteSerializer(serializers.ModelSerializer):
     classe_libelle = serializers.ReadOnlyField(source='classe_fs.lib_classe')
@@ -63,10 +59,13 @@ class AffectationSerializer(serializers.ModelSerializer):
     eleve_details = EleveSerializer(source='eleve_aff', read_only=True)
     classe_nom = serializers.ReadOnlyField(source='classe_aff.lib_classe')
     annee_nom = serializers.ReadOnlyField(source='annee_aff.annee_scolaire')
+    niveau_classe = serializers.ReadOnlyField(source='classe_aff.niveau_classe')
+    option_classe = serializers.ReadOnlyField(source='classe_aff.option_classe')
 
     class Meta:
         model = TableAffectation
         fields = '__all__'
+        depth = 0
 
 class RecouvrementSerializer(serializers.ModelSerializer):
     # Informations imbriquées pour faciliter l'affichage des reçus dans Next.js

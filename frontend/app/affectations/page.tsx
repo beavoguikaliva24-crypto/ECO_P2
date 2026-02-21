@@ -1,73 +1,108 @@
 "use client";
 import React, { useState, useEffect, useMemo } from 'react';
 import axios from 'axios';
-import { 
-  Plus, Search, Filter, FileText, Download, 
-  Users, GraduationCap, Calendar, TrendingUp, 
-  Info, RefreshCw, Edit, ChevronLeft, ChevronRight
-} from 'lucide-react';
+import { Plus, Search, FileText, Download, Users, GraduationCap, Calendar, TrendingUp, Info, RefreshCw, Edit, ChevronLeft, ChevronRight} from 'lucide-react';
 import AffectationModal from '../affectations/AffectationModal';
 import * as XLSX from 'xlsx';
 import jsPDF from 'jspdf';
-import 'jspdf-autotable';
+import autoTable from 'jspdf-autotable';
 import DashboardLayout from '../dashboard/layout';
+import { toast } from 'react-hot-toast';
 
 export default function AffectationsPage() {
-  const [affectations, setAffectations] = useState([]);
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [selectedAff, setSelectedAff] = useState(null);
+    const [affectations, setAffectations] = useState([]);
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedAff, setSelectedAff] = useState(null);
+    const NIVEAU_CHOIX = [
+        { value: 'cre', label: 'Crèche' }, { value: 'mat', label: 'Maternel' },
+        { value: 'pri', label: 'Primaire' }, { value: 'clg', label: 'Collège' },
+        { value: 'lyc', label: 'Lycée' }, { value: 'aut', label: 'Autres' },
+    ];
+    const OPTION_CHOIX = [
+        { value: 'se', label: 'Sciences Expérimentales' },{ value: 'sm', label: 'Sciences Maths' },
+        { value: 'ss', label: 'Sciences Scociales' },{ value: 'sc', label: 'Scientifiques' },
+        { value: 'lit', label: 'Littéraires' },{ value: 'aut', label: 'Autres' },
+
+    ];
+const getNiveauLabel = (value) => {
+  return NIVEAU_CHOIX.find(n => n.value === value)?.label || value;
+};
+
+const getOptionLabel = (value) => {
+  return OPTION_CHOIX.find(o => o.value === value)?.label || value;
+};
   
-  // États pour la recherche et les filtres
-  const [searchTerm, setSearchTerm] = useState('');
-  const [filterClasse, setFilterClasse] = useState('');
-  const [filterAnnee, setFilterAnnee] = useState('');
+  // 0. États des filtres
+  const [searchTerm, setSearchTerm] = useState("");
+const [filterAnnee, setFilterAnnee] = useState("");
+const [filterClasse, setFilterClasse] = useState("");
+const [filterNiveau, setFilterNiveau] = useState("");
+const [filterOption, setFilterOption] = useState("");
 
-  // --- ÉTATS POUR LA PAGINATION ---
   const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 8; // Nombre de lignes par page
+  const itemsPerPage = 25;
 
+  // 1. CHARGEMENT DES DONNÉES
   const fetchAffectations = async () => {
-    try {
-      const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/affectations/`);
-      setAffectations(res.data);
-    } catch (error) { console.error("Erreur de chargement", error); }
-  };
+  try {
+    const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/affectations/`);
+    console.log("STRUCTURE DONNÉES :", res.data[0]); // <--- Regardez ceci dans la console F12
+    setAffectations(res.data);
+  } catch (error) { 
+    console.error("Erreur de chargement", error); 
+    toast.error("Erreur de connexion à l'API");
+  }
+};
 
-  useEffect(() => { fetchAffectations(); }, []);
+// 2. LOGIQUE DE FILTRAGE
+const filteredData = useMemo(() => {
+  return affectations.filter((aff: any) => {
+    // Recherche par nom ou matricule
+    const matchesSearch = 
+      aff.eleve_details?.fullname?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      aff.eleve_details?.matricule?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    // Filtres exacts
+    const matchesAnnee = filterAnnee ? aff.annee_nom === filterAnnee : true;
+    const matchesClasse = filterClasse ? aff.classe_nom === filterClasse : true;
+    
+    // Nouveaux filtres (Niveau et Option)
+    // On vérifie si la propriété existe dans votre objet 'aff' (ex: aff.niveau_nom ou aff.classe_details?.niveau)
+    const matchesNiveau = filterNiveau ? aff.niveau_classe === filterNiveau : true;
+    const matchesOption = filterOption ? aff.option_classe === filterOption : true;
+    
+    return matchesSearch && matchesAnnee && matchesClasse && matchesNiveau && matchesOption;
+  });
+}, [affectations, searchTerm, filterAnnee, filterClasse, filterNiveau, filterOption]); 
 
-  // --- LOGIQUE DE FILTRE ---
-  const filteredData = useMemo(() => {
-    return affectations.filter((aff: any) => {
-      const matchSearch = (aff.eleve_details?.fullname + aff.eleve_details?.matricule)
-        .toLowerCase().includes(searchTerm.toLowerCase());
-      const matchClasse = filterClasse === '' || aff.classe_nom === filterClasse;
-      const matchAnnee = filterAnnee === '' || aff.annee_nom === filterAnnee;
-      return matchSearch && matchClasse && matchAnnee;
-    });
-  }, [affectations, searchTerm, filterClasse, filterAnnee]);
+  useEffect(() => { 
+    fetchAffectations(); 
+  }, []);
 
-  // --- LOGIQUE DE PAGINATION ---
+  // 4. PAGINATION
   const totalPages = Math.ceil(filteredData.length / itemsPerPage);
   const paginatedData = useMemo(() => {
     const start = (currentPage - 1) * itemsPerPage;
     return filteredData.slice(start, start + itemsPerPage);
   }, [filteredData, currentPage]);
 
-  // Réinitialiser la page quand on filtre
-  useEffect(() => { setCurrentPage(1); }, [searchTerm, filterClasse, filterAnnee]);
-
-  // --- STATISTIQUES (Basées sur les données filtrées) ---
-  const stats = {
+  // 5. STATISTIQUES
+  const stats = useMemo(() => ({
     total: filteredData.length,
     nouveaux: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'nouv').length,
-    admis : filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'adm').length,
-    redoublants : filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'red').length,
-    cdt : filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'cdt').length,
+    admis: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'adm').length,
+    redoublants: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'red').length,
+    cdt: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'cdt').length,
     autres: filteredData.filter((a: any) => a.etat_aff?.toLowerCase() === 'aut').length,
     classes: new Set(filteredData.map((a: any) => a.classe_nom)).size,
+  }), [filteredData]);
+
+  const handleCloseModal = () => {
+    setIsModalOpen(false);
+    setSelectedAff(null);
   };
 
-  // --- EXPORTATION ---
+  // 6. EXPORTS
   const exportExcel = () => {
     const data = filteredData.map(a => ({
       Matricule: a.eleve_details?.matricule,
@@ -79,18 +114,23 @@ export default function AffectationsPage() {
     const ws = XLSX.utils.json_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Affectations");
-    XLSX.writeFile(wb, "Affectations_Eleves.xlsx");
+    XLSX.writeFile(wb, "Affectations.xlsx");
   };
 
-  const exportPDF = () => {
+  const exportToPDF = () => {
     const doc = new jsPDF();
-    doc.text("Liste des Affectations", 14, 15);
-    (doc as any).autoTable({
-      startY: 20,
-      head: [['Matricule', 'Nom Complet', 'Classe', 'Année']],
+    autoTable(doc, {
+      startY: 50,
+      head: [['Matricule', 'Nom Complet', 'Classe', 'Année', 'Statut']],
       body: filteredData.map(a => [
-        a.eleve_details?.matricule, a.eleve_details?.fullname, a.classe_nom, a.annee_nom
+        a.eleve_details?.matricule || '-', 
+        a.eleve_details?.fullname || '-', 
+        a.classe_nom || '-', 
+        a.annee_nom || '-',
+        a.etat_aff || '-'
       ]),
+      theme: 'grid',
+      headStyles: { fillColor: [37, 99, 235] }
     });
     doc.save("Affectations.pdf");
   };
@@ -111,7 +151,7 @@ export default function AffectationsPage() {
             </div>
 
             {/* CARTES STATISTIQUES */}
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
+            <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-2">
               <StatCard title="Total" value={stats.total} icon={<Users size={20} className="text-blue-600"/>} color="bg-blue-50" />
               <StatCard title="Nouveaux" value={stats.nouveaux} icon={<TrendingUp size={20} className="text-emerald-600"/>} color="bg-emerald-50" />
               <StatCard title="Admis" value={stats.admis} icon={<GraduationCap size={20} className="text-orange-600"/>} color="bg-orange-50" />
@@ -122,64 +162,104 @@ export default function AffectationsPage() {
             </div>
 
             {/* BARRE DE RECHERCHE ET FILTRES */}
-            <div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center">
-              <div className="relative flex-1 min-w-[250px]">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-                <input type="text" placeholder="Rechercher par nom ou matricule..."
-                  className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none"
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                />
-              </div>
-              <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => setFilterAnnee(e.target.value)}>
-                <option value="">Toutes les années</option>
-                {[...new Set(affectations.map((a:any) => a.annee_nom))].map(an => <option key={an} value={an}>{an}</option>)}
-              </select>
-              <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                onChange={(e) => setFilterClasse(e.target.value)}>
-                <option value="">Toutes les classes</option>
-                {[...new Set(affectations.map((a:any) => a.classe_nom))].map(cl => <option key={cl} value={cl}>{cl}</option>)}
-              </select>
-              <div className="flex gap-2 border-l pl-4 border-slate-100">
-                <button onClick={exportExcel} className="p-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors">
-                  <Download size={18}/>
-                </button>
-                <button onClick={exportPDF} className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
-                  <FileText size={18}/>
-                </button>
-              </div>
-            </div>
+<div className="bg-white p-2 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-3 items-center">
+  <div className="relative flex-1 min-w-[200px]">
+    <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+    <input type="text" placeholder="Rechercher..."
+      className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+      onChange={(e) => setSearchTerm(e.target.value)}
+    />
+  </div>
+
+  {/* Filtre Année */}
+  <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    onChange={(e) => setFilterAnnee(e.target.value)}>
+    <option value="">Toutes les années</option>
+    {[...new Set(affectations.map((a:any) => a.annee_nom))].map(an => <option key={an} value={an}>{an}</option>)}
+  </select>
+
+{/* Filtre Niveau */}
+<select 
+  className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  onChange={(e) => setFilterNiveau(e.target.value)}
+  value={filterNiveau}
+>
+  <option value="">Tous les niveaux</option>
+  {NIVEAU_CHOIX.map(niv => (
+    <option key={niv.value} value={niv.value}>{niv.label}</option>
+  ))}
+</select>
+
+{/* Filtre Option */}
+<select 
+  className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+  onChange={(e) => setFilterOption(e.target.value)}
+  value={filterOption}
+>
+  <option value="">Toutes les options</option>
+  {OPTION_CHOIX.map(opt => (
+    <option key={opt.value} value={opt.value}>{opt.label}</option>
+  ))}
+</select>
+
+  {/* Filtre Classe */}
+  <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
+    onChange={(e) => setFilterClasse(e.target.value)}>
+    <option value="">Toutes les classes</option>
+    {[...new Set(affectations.map((a:any) => a.classe_nom))].map(cl => <option key={cl} value={cl}>{cl}</option>)}
+  </select>
+
+  <div className="flex gap-2 border-l pl-4 border-slate-100">
+    <button onClick={exportExcel} className="p-2.5 bg-green-50 text-green-600 rounded-xl hover:bg-green-100 transition-colors">
+      <Download size={18}/>
+    </button>
+    <button onClick={exportToPDF} className="p-2.5 bg-red-50 text-red-600 rounded-xl hover:bg-red-100 transition-colors">
+      <FileText size={18}/>
+    </button>
+  </div>
+</div>
         {/* TABLEAU AVEC SCROLL ET PAGINATION */}
         <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden flex flex-col">
-          {/* Container Scrollable */}
           <div className="overflow-x-auto overflow-y-auto">
             <table className="w-full text-left border-collapse">
               <thead className="bg-slate-50/80 sticky top-0 z-10 border-b border-slate-100 backdrop-blur-md">
                 <tr>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase">Élève</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase">Classe</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase">Niveau</th>
+                  <th className="p-4 text-xs font-bold text-slate-400 uppercase">Option</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase text-center">Statut</th>
                   <th className="p-4 text-xs font-bold text-slate-400 uppercase text-right">Actions</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
+              <tbody className="divide-y divide-slate-200">
                 {paginatedData.map((aff: any) => (
-                  <tr key={aff.id} className="hover:bg-slate-50/50 transition-colors">
-                    <td className="p-4">
+                  <tr key={aff.id} className="hover:bg-slate-200/50 transition-colors">
+                    <td className="pl-4 pb-1 pt-1">
                       <div className="font-bold text-slate-700">{aff.eleve_details?.fullname}</div>
                       <div className="text-[10px] text-slate-400 font-mono uppercase">{aff.eleve_details?.matricule}</div>
                     </td>
-                    <td className="p-4">
+                    <td className="pl-4 pb-1 pt-1">
                       <div className="text-sm font-semibold text-blue-600">{aff.classe_nom}</div>
                       <div className="text-[10px] text-slate-400 uppercase font-medium">{aff.annee_nom}</div>
                     </td>
-                    <td className="p-4 text-center">
+                    <td className="pl-4 pb-1 pt-1">
+  <div className="text-sm font-medium text-slate-700">
+    {getNiveauLabel(aff.niveau_classe)}
+  </div>
+</td>
+<td className="pl-4 pb-1 pt-1">
+  <div className="text-sm font-medium text-slate-700">
+    {getOptionLabel(aff.option_classe)}
+  </div>
+</td>
+                    <td className="pl-4 pb-1 pt-1 text-center">
                       <span className={`px-3 py-1 rounded-full text-[10px] font-black uppercase ${
                         aff.etat_aff?.toLowerCase() === 'nouv' ? 'bg-emerald-100 text-emerald-600' : 'bg-orange-100 text-orange-600'}`}>
                         {aff.etat_aff}
                       </span>
                     </td>
-                    <td className="p-4 text-right">
+                    <td className="pl-4 pb-1 pt-1 text-right">
                       <button onClick={() => { setSelectedAff(aff); setIsModalOpen(true); }} 
                         className="p-2 text-slate-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-all">
                         <Edit size={18} />
@@ -224,9 +304,11 @@ export default function AffectationsPage() {
         </div>
 
         <AffectationModal 
-          isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} 
-          refreshList={fetchAffectations} selectedAffectation={selectedAff}
-        />
+  isOpen={isModalOpen} 
+  onClose={handleCloseModal} // Correction ici : juste le nom de la fonction
+  refreshList={fetchAffectations} 
+  selectedAffectation={selectedAff}
+/>
       </div>
     </DashboardLayout>
   );

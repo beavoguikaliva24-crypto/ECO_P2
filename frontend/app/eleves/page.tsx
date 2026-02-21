@@ -116,12 +116,11 @@ export default function ElevesPage() {
 
         doc.save(`Liste_Eleves.pdf`);
     };
-
+    
     const handleEdit = (eleve: any) => {
-        setSelectedEleve(eleve);
-        setIsModalOpen(true);
-    };
-
+    setCurrentEleve(eleve); // C'est ici qu'on fixe la donnée
+    setIsModalOpen(true);
+};
     return (
         <DashboardLayout>
             {/* On utilise h-full sur le conteneur principal pour que le scroll interne fonctionne */}
@@ -135,13 +134,13 @@ export default function ElevesPage() {
                             <p className="text-sm text-slate-500 font-medium">Effectif actuel de l'établissement</p>
                         </div>
                         <button onClick={() => { setCurrentEleve(null); setIsModalOpen(true); }}
-                          className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-blue-100 transition-all"
+                          className="bg-blue-600 hover:bg-blue-700 cursor-pointer text-white px-5 py-2.5 rounded-xl flex items-center gap-2 shadow-lg shadow-blue-100 transition-all"
                         >
                             <Plus size={18}/> Inscrire un élève
                         </button>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3">
+                    <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-3">
                         {/* ... Tes cartes de stats ici (gardées à l'identique) ... */}
                         <StatCard icon={<Users size={20}/>} label="Total" value={stats.total} color="blue" />
                         <StatCard icon={<UserCircle size={20}/>} label="Garçons" value={stats.garcons} total={stats.total} color="indigo" />
@@ -163,7 +162,7 @@ export default function ElevesPage() {
                         <div className="flex gap-2">
                             {/* Bouton Excel */}
                             <button onClick={exportToExcel}
-                                className="flex items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-colors font-bold text-sm"
+                                className="flex cursor-pointer items-center gap-2 px-4 py-3 bg-emerald-50 text-emerald-700 border border-emerald-100 rounded-2xl hover:bg-emerald-100 transition-colors font-bold text-sm"
                             >
                                 <FileSpreadsheet size={18} />
                                 <span className="hidden sm:inline">Excel</span>
@@ -171,7 +170,7 @@ export default function ElevesPage() {
 
                             {/* Bouton PDF */}
                             <button onClick={exportToPDF}
-                                className="flex items-center gap-2 px-4 py-3 bg-red-50 text-red-700 border border-red-100 rounded-2xl hover:bg-red-100 transition-colors font-bold text-sm"
+                                className="flex cursor-pointer items-center gap-2 px-4 py-3 bg-red-50 text-red-700 border border-red-100 rounded-2xl hover:bg-red-100 transition-colors font-bold text-sm"
                             >
                                 <FileText size={18} />
                                 <span className="hidden sm:inline">PDF</span>
@@ -268,8 +267,8 @@ export default function ElevesPage() {
                                     </td>
                                     <td className="p-3 text-right">
                                         <div className="flex justify-end gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                                            <button onClick={() => handleEdit(eleve)} className="p-1.5 text-blue-600 hover:bg-blue-50 rounded-lg"><Edit size={15}/></button>
-                                            <button className="p-1.5 text-red-600 hover:bg-red-50 rounded-lg"><Trash2 size={15}/></button>
+                                            <button onClick={() => handleEdit(eleve)} className="p-1.5 text-blue-600 hover:bg-blue-50 cursor-pointer rounded-lg"><Edit size={15}/></button>
+                                            <button className="p-1.5 text-red-600 hover:bg-red-50 cursor-pointer rounded-lg"><Trash2 size={15}/></button>
                                         </div>
                                     </td>
                                 </tr>
