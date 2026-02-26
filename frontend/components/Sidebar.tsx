@@ -17,7 +17,7 @@ const menuItems = [
   { name: 'Élèves', path: '/eleves', icon: Users },
   { name: 'Affectations', path: '/affectations', icon: LayersPlus },
   { name: 'Classes', path: '/classes', icon: School },
-  { name: 'Recouvrement', path: '/recouvrement', icon: Wallet },
+  { name: 'Recouvrement', path: '/recouvrements', icon: Wallet },
   { name: 'Scolarités', path: '/scolarites', icon: GraduationCap },
 ];
 
@@ -44,13 +44,25 @@ export default function Sidebar({ isCollapsed, setIsCollapsed }: SidebarProps) {
 
       {/* HEADER : Logo et Nom */}
       <div className="p-3">
-        <div className={`flex items-center justify-center gap-3 py-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 ${isCollapsed ? 'px-0' : 'px-2'}`}>
-          <div className="bg-blue-600 p-2 rounded-xl shadow-lg shadow-blue-900/20 shrink-0">
-            <School size={22} className="text-white" />
-          </div>
-          {/* On cache le texte du logo si réduit */}
-          {!isCollapsed && <span className="font-black tracking-tighter text-blue-400 whitespace-nowrap">ECO1 - PRO</span>}
-        </div>
+        <div className={` items-center gap-3 py-4 bg-slate-800/40 rounded-2xl border border-slate-700/50 transition-all duration-300 ${isCollapsed ? 'justify-center px-2' : 'px-4'}`}>
+  
+  {/* Logo Container */}
+  <div className="bg-white flex items-center justify-center p-2 rounded-xl shadow-lg shrink-0">
+    <img
+      src="/eco1.png"
+      alt="Logo"
+      className="h-20 w-auto select-none" // Adjusted height for a more standard sidebar fit
+      draggable={false}
+    />
+  </div>
+
+  {/* Logo Text - Only visible when not collapsed */}
+  {!isCollapsed && (
+    <span className="flex items-center justify-center font-black tracking-tighter text-blue-300 whitespace-nowrap overflow-hidden animate-in fade-in duration-500">
+  ECORYS - 224
+</span>
+  )}
+</div>
       </div>
 
       {/* NAVIGATION : Menu principal */}

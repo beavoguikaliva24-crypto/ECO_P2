@@ -26,12 +26,16 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      console.log("Envoi des identifiants :", { username, password });
-      // Appel à ton API Django (LoginView)
-      const res = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/login/`, {
-        username,
-        password
-      });
+  const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api" || "http://127.0.0.1:8000/api";
+
+  console.log("Envoi des identifiants :", { username, API_URL });
+
+  const res = await axios.post(`${API_URL}/login/`, {
+    username,
+    password,
+  });
+
+  // suite de ton code...
 
       // Dans handleLogin, après la requête axios réussie
 const userData = res.data.user || res.data; // Prend 'user' s'il existe, sinon l'objet entier

@@ -3,23 +3,28 @@ import React, { useState, useEffect } from 'react';
 import AuthGuard from '@/components/AuthGuard';
 import StatEleve from './StatEleves';
 import StatAffectations from './StatAffectations';
+import StatRecouvrement from './StatRecouvrement';
+import StatsRecouvrementContainer from "./StatsRecouvrementContainer";
 
 export default function DashboardPage() {
   const [eleves, setEleves] = useState([]);
   const [affectations, setAffectations] = useState([]);
+  const [recouvrements, setRecouvrements]= useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:8000';
+    const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api" || "http://127.0.0.1:8000/api" || "http://beapc:8000/api";
 
     // Utilisation de Promise.all pour charger les deux sources
     Promise.all([
       fetch(`${apiUrl}/eleves/`).then(res => res.ok ? res.json() : []),
-      fetch(`${apiUrl}/affectations/`).then(res => res.ok ? res.json() : [])
+      fetch(`${apiUrl}/affectations/`).then(res => res.ok ? res.json() : []),
+      fetch(`${apiUrl}/recouvrements/`).then(res => res.ok ? res.json() : []),
     ])
-    .then(([elevesData, affData]) => {
+    .then(([elevesData, affData, RecData]) => {
       setEleves(elevesData);
       setAffectations(affData);
+      setRecouvrements(RecData);
       setLoading(false);
     })
     .catch(err => {
@@ -43,6 +48,11 @@ export default function DashboardPage() {
         
         {/* Ton code StatAffectations corrigé s'affichera ici */}
         <StatAffectations affectations={affectations} />
+
+        {/* Ton code StatAffectations corrigé s'affichera ici */}
+        {/*<StatRecouvrement recouvrements={recouvrements} />*/}
+
+        <StatsRecouvrementContainer />
       </div>
     </AuthGuard>
   );

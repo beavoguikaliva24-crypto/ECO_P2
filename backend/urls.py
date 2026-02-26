@@ -15,6 +15,10 @@ router.register(r'frais', FraisScolariteViewSet)
 router.register(r'affectations', AffectationViewSet)
 router.register(r'recouvrements', RecouvrementViewSet)
 
+
 urlpatterns = [
+    # 👉 Endpoint d’API de stats (APIView)
+    path('stats/recouvrement/', StatsRecouvrementAPIView.as_view(), name='stats-recouvrement'),
+    # 👉 Tous les ViewSets (router DRF)
     path('', include(router.urls)),
 ]

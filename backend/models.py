@@ -244,8 +244,7 @@ class TableAffectation(models.Model):
 
 class TableRecouvrement(models.Model):
     statut_ar_choix = [('Ins', 'Inscription'),('Reins', 'Réinscription'),('Aut', 'Autre'),]
-    affectation = models.ForeignKey(TableAffectation,on_delete=models.CASCADE, null=True, 
-        blank=True, verbose_name="Effectation")
+    affectation = models.ForeignKey(TableAffectation,on_delete=models.CASCADE, null=True, blank=True, verbose_name="Effectation")
     #date_paiement = models.DateTimeField(auto_now_add=True)
     statut_ar = models.CharField(max_length=5, choices=statut_ar_choix, default='Aut', null=True, blank=True, verbose_name="Statut")
     montant_statut_ar = models.DecimalField(max_digits=10, decimal_places=0, validators=[MinValueValidator(0)],default=0)
@@ -288,6 +287,9 @@ class TableRecouvrement(models.Model):
     class Meta:
         verbose_name = "Recouvrement"
         verbose_name_plural = "Recouvrements"
+        constraints = [
+            models.UniqueConstraint(fields=['affectation'], name='unique_rec'),
+        ]
 
     def save(self, *args, **kwargs):
         if self.affectation and self.affectation.annee_aff and self.affectation.classe_aff:

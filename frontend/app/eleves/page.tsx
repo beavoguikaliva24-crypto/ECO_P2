@@ -28,9 +28,11 @@ export default function ElevesPage() {
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 25;
 
+    const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api" || "http://127.0.0.1:8000/api" || "http://beapc:8000/api";
+
     const fetchEleves = async () => {
         try {
-            const res = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/eleves/?search=${search}`);
+            const res = await axios.get(`${API}/eleves/?search=${search}`);
             setEleves(res.data);
             setCurrentPage(1); // Reset à la page 1 lors d'une recherche
         } 

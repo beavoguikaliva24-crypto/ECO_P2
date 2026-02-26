@@ -34,6 +34,9 @@ export default function EleveModal({ isOpen, onClose, refreshList, selectedEleve
 const [showAffectationAfterCreate, setShowAffectationAfterCreate] = useState(false);
 const [newlyCreatedEleveId, setNewlyCreatedEleveId] = useState<number | null>(null);
 
+ const API = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api" || "http://127.0.0.1:8000/api" || "http://beapc:8000/api";
+
+
   useEffect(() => {
     if (selectedEleve) {
       setFormData({
@@ -87,11 +90,11 @@ const handleSave = async (shouldAffect: boolean = false) => {
     
     if (selectedEleve) {
       // Cas : Modification
-      response = await axios.put(`${process.env.NEXT_PUBLIC_API_URL}/eleves/${selectedEleve.id}/`, data);
+      response = await axios.put(`${API}/eleves/${selectedEleve.id}/`, data);
       toast.success("Élève mis à jour !");
     } else {
       // Cas : Nouvelle inscription
-      response = await axios.post(`${process.env.NEXT_PUBLIC_API_URL}/eleves/`, data);
+      response = await axios.post(`${API}/eleves/`, data);
       toast.success("Élève ajouté avec succès !");
     }
 
