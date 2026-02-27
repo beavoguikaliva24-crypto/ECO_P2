@@ -1,7 +1,7 @@
 "use client";
 
 import axios from "axios";
-import {Search, FileText, Download, Wallet, CheckCircle2,Edit, MessageCircleWarning, AlertCircle, Trash2, ChevronLeft, ChevronRight,} from "lucide-react";
+import {Search, FileText, Download, Wallet, CheckCircle2,Edit, MessageCircleWarning, AlertCircle, Trash2, ChevronLeft, ChevronRight, FileSpreadsheet,} from "lucide-react";
 import DashboardLayout from "../dashboard/layout";
 import * as XLSX from "xlsx";
 import jsPDF from "jspdf";
@@ -244,58 +244,56 @@ const fetchData = useCallback(async () => {
                 </div>
 
                 {/* BARRE D'ACTIONS */}
-                <div className="bg-white p-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-4 items-center justify-between">
-                    <div className="flex flex-wrap gap-3 items-center">
-                        <div className="flex items-center gap-2 border px-3 py-2 rounded-xl bg-zinc-50 w-full md:w-64">
-                            <Search size={18} className="text-zinc-500" />
-                            <input type="text" placeholder="Nom de l'élève..." className="bg-transparent outline-none text-sm w-full" value={searchTerm}
-                                onChange={(e) => setSearchTerm(e.target.value)}
-                            />
+                <div className="bg-white p-2 mb-3 rounded-2xl shadow-sm border border-slate-100 flex flex-wrap gap-3 items-center">
+                            <div className="relative flex-1 min-w-[200px]">
+                                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
+                                <input value={searchTerm} onChange={(e)=> setSearchTerm(e.target.value)} placeholder="Rechercher par classe ou année..." 
+                                className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm" />
+                            </div>
+
+                            {/* Filtre Année */}
+                            <select
+                                className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none"
+                                value={filterAnnee} onChange={(e) => setFilterAnnee(e.target.value)}
+                            >
+                                <option value="">Toutes les années</option>
+                                {[...new Set(recouvrements.map(item => item.affectation_details?.annee_nom).filter(Boolean))].map((an: any) => (
+                                    <option key={an} value={an}>{an}</option>
+                                ))}
+                            </select>
+
+                            {/* Filtre Classe */}
+                            <select
+                                className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none"
+                                value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}
+                            >
+                                <option value="">Toutes les classes</option>
+                                {[...new Set(recouvrements.map(item => item.affectation_details?.classe_lib).filter(Boolean))].map((cl: any) => (
+                                    <option key={cl} value={cl}>{cl}</option>
+                                ))}
+                            </select>
+                            
+                            {/* Filtre Statut */}
+                            <select className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
+                                <option value="">Tous les statuts</option>
+                                <option value="Aucun_Paiement">Aucun paiement (Impayés)</option>
+                                <option value="en_cours">En cours (Partiels)</option>
+                                <option value="termine">Terminés (Soldés)</option>
+                            </select>
+
+                        {/* Export Excel et PDF */}
+                        <div className="flex items-center gap-2">
+                            <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold"><FileSpreadsheet size={16} /> Excel</button>
+                            <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-bold"><FileText size={16} /> PDF</button>
                         </div>
-
-                        {/* Filtre Année */}
-                        <select
-                            className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                            value={filterAnnee} onChange={(e) => setFilterAnnee(e.target.value)}
-                        >
-                            <option value="">Toutes les années</option>
-                            {[...new Set(recouvrements.map(item => item.affectation_details?.annee_nom).filter(Boolean))].map((an: any) => (
-                                <option key={an} value={an}>{an}</option>
-                            ))}
-                        </select>
-
-                        {/* Filtre Classe */}
-                        <select
-                            className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500"
-                            value={filterClasse} onChange={(e) => setFilterClasse(e.target.value)}
-                        >
-                            <option value="">Toutes les classes</option>
-                            {[...new Set(recouvrements.map(item => item.affectation_details?.classe_lib).filter(Boolean))].map((cl: any) => (
-                                <option key={cl} value={cl}>{cl}</option>
-                            ))}
-                        </select>
-                        
-                        {/* Filtre Statut */}
-                        <select className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none" value={filterStatut} onChange={(e) => setFilterStatut(e.target.value)}>
-                            <option value="">Tous les statuts</option>
-                            <option value="Aucun_Paiement">Aucun paiement (Impayés)</option>
-                            <option value="en_cours">En cours (Partiels)</option>
-                            <option value="termine">Terminés (Soldés)</option>
-                        </select>
-                    </div>
-
-                    {/* Export Excel et PDF */}
-                    <div className="flex items-center gap-2">
-                        <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold"><Download size={16} /> Excel</button>
-                        <button onClick={exportPDF} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-bold"><FileText size={16} /> PDF</button>
-                    </div>
                 </div>
 
                 {/* TABLEAU */}
-                <div className="bg-white rounded-2xl border border-zinc-200 overflow-x-auto overflow-y-auto shadow-sm">
-                    <table className="min-w-full divide-y divide-zinc-200 w-full text-left border-collapse">
-                        <thead className="bg-zinc-50">
-                            <tr>
+                <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
+                    <div className="overflow-x-auto overflow-y-auto">
+                        <table className="w-full text-left border-collapse">
+                            <thead className="bg-slate-50/80 sticky top-0 z-10 border-b border-slate-100 backdrop-blur-md">
+                                <tr className="text-slate-500 text-xs uppercase font-bold">
                                 <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Élève</th>
                                 <th className="px-4 py-3 text-left text-xs font-bold text-zinc-500 uppercase">Classe</th>
                                 <th className="px-4 py-3 text-right text-xs font-bold text-zinc-500 uppercase">Frais</th>
@@ -310,11 +308,9 @@ const fetchData = useCallback(async () => {
                                 const total = toNumber(item.frais_paiement);
                                 const totalPaye = toNumber(item.total_paye);
                                 const reste = Math.max(0, total - totalPaye);
-
+                                {/* 🔥 On affiche en rouge les lignes avec reste > 0, et en vert celles soldées */}
                                 return (
-                                    <tr
-                                        key={item.id}
-                                        onClick={() => { setSelectedRecouvrement(item); setIsModalOpen(true); }}
+                                    <tr key={item.id} onClick={() => { setSelectedRecouvrement(item); setIsModalOpen(true); }}
                                         className="hover:bg-blue-50 cursor-pointer transition-colors border-b border-zinc-100"
                                     >
                                         <td className="px-4 py-3 text-sm font-semibold text-zinc-900">
@@ -329,16 +325,14 @@ const fetchData = useCallback(async () => {
                                             <div className="flex flex-col">
                                                 <span>{item.affectation_details?.classe_lib || "Classe inconnue"}</span>
                                                 <span className="text-xs text-zinc-500 font-normal">
-                                                {   item.affectation_details?.annee_nom || "SANS-ANNEE"}
+                                                    {item.affectation_details?.annee_nom || "SANS-ANNEE"}
                                                 </span>
                                             </div>
                                         </td>
                                         <td className="px-4 py-3 text-sm text-right">{total.toLocaleString()}</td>
                                         <td className="px-4 py-3 text-sm text-right font-bold text-green-600">{totalPaye.toLocaleString()}</td>
                                         <td className={`px-4 py-3 text-sm text-right font-bold ${reste > 0 ? "text-red-600" : "text-emerald-600"}`}>{reste.toLocaleString()}</td>
-                                        <td className="px-4 py-3 text-center">
-                                            {getStatutPaiementBadge({ total, totalPaye })}
-                                        </td>
+                                        <td className="px-4 py-3 text-center"> {getStatutPaiementBadge({ total, totalPaye })} </td>
                                         <td className="p-3 text-right">
                                             <div className="flex justify-end gap-1 group-hover:opacity-100 transition-opacity" onClick={(e) => e.stopPropagation()}>
                                                 <button className="p-1.5 text-blue-600 hover:bg-blue-50 cursor-pointer rounded-lg"><Edit size={15} /></button>
@@ -353,20 +347,14 @@ const fetchData = useCallback(async () => {
 
                     {/* Pagination */}
                     <div className="p-4 border-t border-slate-50 flex items-center justify-between bg-slate-50/30">
-                        <div className="text-xs font-medium text-slate-500">
-                            Affichage de {" "}
-                            <span className="text-slate-800 font-bold">
-                                {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
-                            </span>{" "}
-                            à {" "}
-                            <span className="text-slate-800 font-bold">
-                                {Math.min(currentPage * itemsPerPage, filteredData.length)}
-                            </span>{" "}
-                            sur {" "}
-                            <span className="text-slate-800 font-bold">{filteredData.length}</span>{" "}
-                            recouvrements
+                        {/* Affichage X - Y sur Z */}
+                        <div className="text-xs text-slate-500">
+                            Affichage <span className=""> 
+                            {filteredData.length > 0 ? (currentPage - 1) * itemsPerPage + 1 : 0}
+                            </span>{" "} - <span className="">{Math.min(currentPage * itemsPerPage, filteredData.length)}</span> 
+                            sur <span className="">{filteredData.length}</span>
                         </div>
-
+                        {/* Boutons de pagination */}
                         <div className="flex items-center gap-2">
                             <button onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))} disabled={currentPage === 1}
                                 className="p-2 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
@@ -388,6 +376,7 @@ const fetchData = useCallback(async () => {
 
             {/* MODAL */}
             <RecouvrementModal isOpen={isModalOpen} onClose={() => {setIsModalOpen(false);setSelectedRecouvrement(null);}} recouvrement={selectedRecouvrement} onSuccess={fetchData}/>
+            </div>
         </DashboardLayout>
     );
 }

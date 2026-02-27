@@ -50,6 +50,8 @@ class ClasseSerializer(serializers.ModelSerializer):
 class FraisScolariteSerializer(serializers.ModelSerializer):
     classe_libelle = serializers.ReadOnlyField(source='classe_fs.lib_classe')
     annee_libelle = serializers.ReadOnlyField(source='annee_fs.annee_scolaire')
+    classe_niveau = serializers.ReadOnlyField(source='classe_fs.niveau_classe')
+    classe_option = serializers.ReadOnlyField(source='classe_fs.option_classe')
 
     class Meta:
         model = TableFraisScolarite

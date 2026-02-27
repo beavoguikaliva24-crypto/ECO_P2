@@ -44,7 +44,7 @@ pip freeze > requirements.txt
 # Retour à la racine eco1
 cd ..
 git add .
-git commit -m "mise a jour affectations export pdf"
+git commit -m "mise  jour sidebar"
 git push origin main
 
 

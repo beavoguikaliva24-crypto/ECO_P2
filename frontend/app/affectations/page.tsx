@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React, { useState, useEffect, useMemo } from "react";
 import axios from "axios";
-import { Plus, Search, FileText, Download, Users, GraduationCap, Calendar, TrendingUp, Info, RefreshCw,Edit, ChevronLeft, ChevronRight,} from "lucide-react";
+import { Plus, Search, FileText, Download, Users, GraduationCap, Calendar, TrendingUp, Info, RefreshCw,Edit, ChevronLeft, ChevronRight, FileSpreadsheet,} from "lucide-react";
 import AffectationModal from "../affectations/AffectationModal";
 import RecouvrementModal from "../recouvrements/RecouvrementModal";
 import * as XLSX from "xlsx";
@@ -106,7 +106,7 @@ export default function AffectationsPage() {
         return OPTION_CHOIX.find((o) => o.value === value)?.label ?? value;
     };
 
-  // ---------- Fetch ----------
+    // ---------- Fetch ----------
     const fetchAffectations = async () => {
         try {
             const res = await axios.get(`${API}/affectations/`);
@@ -125,15 +125,16 @@ export default function AffectationsPage() {
             // On extrait l'id d'affectation depuis plusieurs formes possibles
             (res.data ?? []).forEach((r: any) => {
         
-            const affId =
-                typeof r?.id_affectation === "number" ? r.id_affectation :
-                typeof r?.affectation_id === "number" ? r.affectation_id :
-                typeof r?.id === "number" ? r.affectation :
-                typeof r?.id === "number" ? r.affectation_id :
-                typeof r?.affectation?.id === "number" ? r.affectation.id : null;
+                const affId =
+                    typeof r?.id_affectation === "number" ? r.id_affectation :
+                    typeof r?.affectation_id === "number" ? r.affectation_id :
+                    typeof r?.affectation === "number" ? r.affectation :
+                    typeof r?.affectation?.id === "number" ? r.affectation.id :
+                    null;
 
-            if (Number.isFinite(affId)) ids.add(affId as number);
-        });
+                if (Number.isFinite(affId)) ids.add(affId as number);
+            }
+        );
             setRecAffectationIds(ids);
         } catch (error) { console.error(error); toast.error("Erreur lors du chargement des recouvrements"); } 
     };
@@ -331,7 +332,11 @@ export default function AffectationsPage() {
     type EleveOption = { value: string; label: string; __eleveId: number };
 
     const Dot: React.FC<{ color: "green" | "red" }> = ({ color }) => (
-        <span className={`inline-block w-2 h-2 rounded-full mr-2 ${ color === "green" ? "bg-emerald-500" : "bg-rose-500"}`}aria-hidden="true"
+        <span
+            className={`inline-block w-2 h-2 rounded-full mr-2 ${
+                color === "green" ? "bg-emerald-500" : "bg-rose-500"
+            }`}
+            aria-hidden="true"
         />
     );
 
@@ -381,7 +386,7 @@ export default function AffectationsPage() {
                 <div className="grid grid-cols-3 sm:grid-cols-3 lg:grid-cols-4 xl-cols-7 xl:grid-cols-7 gap-2">
                     <StatCard title="Total" value={stats.total} icon={<Users size={20} className="text-blue-600" />} color="bg-blue-50"/>
                     <StatCard title="Nouveaux" value={stats.nouveaux} icon={<TrendingUp size={20} className="text-emerald-600" />} color="bg-emerald-50"/>
-                    <StatCard title="Admis" value={stats.admis} icon={<GraduationCap size={20} className="text-orange-600" />}color="bg-orange-50"/>
+                    <StatCard title="Admis" value={stats.admis} icon={<GraduationCap size={20} className="text-orange-600" />} color="bg-orange-50"/>
                     <StatCard title="Redoublants" value={stats.redoublants} icon={<RefreshCw size={20} className="text-amber-600" />} color="bg-amber-50"/>
                     <StatCard title="CDT" value={stats.cdt} icon={<Calendar size={20} className="text-purple-600" />} color="bg-purple-50"/>
                     <StatCard title="Autres" value={stats.autres} icon={<Info size={20} className="text-slate-600" />} color="bg-slate-50"/>
@@ -393,49 +398,38 @@ export default function AffectationsPage() {
                     <div className="relative flex-1 min-w-[200px]">
                         <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18}/>
                         <input type="text" placeholder="Rechercher..." onChange={(e) => setSearchTerm(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border-none rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
+                            className="w-full pl-10 pr-4 py-2 bg-slate-50 border border-zinc-200 rounded-xl focus:ring-2 focus:ring-blue-500 outline-none text-sm"
                         />
                     </div>
 
                     {/* Filtre Année */}
-                    <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" onChange={(e) => setFilterAnnee(e.target.value)}>
+                    <select className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none" onChange={(e) => setFilterAnnee(e.target.value)}>
                         <option value="">Toutes les années</option>
                         {[...new Set(affectations.map((a) => a.annee_nom))].map((an) => an ? (<option key={an} value={an}>{an}</option> ) : null)}
                     </select>
 
                     {/* Filtre Niveau */}
-                    <select  onChange={(e) => setFilterNiveau(e.target.value)} value={filterNiveau} className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500">
+                    <select  onChange={(e) => setFilterNiveau(e.target.value)} value={filterNiveau} className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500">
                         <option value="">Tous les niveaux</option>
                         {NIVEAU_CHOIX.map((niv) => (<option key={niv.value} value={niv.value}>{niv.label}</option>))}
                     </select>
 
                     {/* Filtre Option */}
-                    <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" onChange={(e) => setFilterOption(e.target.value)} value={filterOption} >
+                    <select className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none"onChange={(e) => setFilterOption(e.target.value)} value={filterOption} >
                         <option value="">Toutes les options</option>
                         {OPTION_CHOIX.map((opt) => (<option key={opt.value} value={opt.value}>{opt.label}</option> ))}
                     </select>
 
                     {/* Filtre Classe */}
-                    <select className="bg-slate-50 border-none rounded-xl p-2 text-sm outline-none focus:ring-2 focus:ring-blue-500" onChange={(e) => setFilterClasse(e.target.value)} >
+                                        <select className="px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-blue-500" onChange={(e) => setFilterClasse(e.target.value)} >
                         <option value="">Toutes les classes</option>
                         {[...new Set(affectations.map((a) => a.classe_nom))].map((cl) => cl ? ( <option key={cl} value={cl}> {cl}</option>) : null)}
                     </select>
 
-                    <div className="flex gap-2 border-l pl-2 border-slate-100">
-                        <button
-                        onClick={exportExcel}
-                        className="flex items-center gap-1 px-3 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
-                        >
-                        <Download size={18} />
-                        Excel
-                        </button>
-                        <button
-                        onClick={exportToPDF}
-                        className="flex items-center gap-1 px-3 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-                        >
-                        <FileText size={18} />
-                        PDF
-                        </button>
+                    {/* Export Excel et PDF */}
+                    <div className="flex items-center gap-2">
+                        <button onClick={exportExcel} className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-bold"><FileSpreadsheet size={16} /> Excel</button>
+                        <button onClick={exportToPDF} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-bold"><FileText size={16} /> PDF</button>
                     </div>
                 </div>
 
@@ -533,31 +527,24 @@ export default function AffectationsPage() {
                         </div>
                     </div>
                 </div>
+                
 
                 {/* MODAL AFFECTATION */}
-                <AffectationModal
-                    isOpen={isAffOpen} onClose={handleCloseAffModal}
-                    refreshList={() => {
-                        fetchAffectations();
-                        fetchRecouvrements();
-                    }}
-                    selectedAffectation={selectedAff}
-                    onOpenRecouvrement={openRecouvrementFromAff}
+                <AffectationModal isOpen={isAffOpen} onClose={handleCloseAffModal}
+                    refreshList={() => {fetchAffectations(); fetchRecouvrements();}}
+                    selectedAffectation={selectedAff} onOpenRecouvrement={openRecouvrementFromAff}
                 />
 
                 {/* MODAL RECOUVREMENT */}
-                <RecouvrementModal
-                    isOpen={isRecOpen} onClose={() => setIsRecOpen(false)}
-                    onSuccess={() => {
-                        fetchAffectations();
-                        fetchRecouvrements();
-                    }}
+                <RecouvrementModal isOpen={isRecOpen} onClose={() => setIsRecOpen(false)}
+                    onSuccess={() => {fetchAffectations(); fetchRecouvrements(); }}
                     recouvrement={selectedRecouvrement}
                 />
             </div>
-        </DashboardLayout>
+            
+        </DashboardLayout> 
     );
-}
+} 
 
 // ---------- Stat Card ----------
 interface StatCardProps {
@@ -567,14 +554,15 @@ interface StatCardProps {
     color: string;
 }
 
+// Petite carte de statistique utilisée dans le dashboard
 function StatCard({ title, value, icon, color }: StatCardProps) {
-    return (
-        <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
-            <div className={`p-2 rounded-xl ${color}`}>{icon}</div>
-            <div>
-                <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{title}</p>
-                <p className="text-lg font-black text-slate-800 leading-tight">{value}</p>
-            </div>
-        </div>
-    );
+  return (
+    <div className="bg-white p-3 rounded-2xl border border-slate-100 shadow-sm flex items-center gap-3">
+      <div className={`p-2 rounded-xl ${color}`}>{icon}</div>
+      <div>
+        <p className="text-slate-500 text-[10px] font-bold uppercase tracking-wider">{title}</p>
+        <p className="text-lg font-black text-slate-800 leading-tight">{value}</p>
+      </div>
+    </div>
+  );
 }

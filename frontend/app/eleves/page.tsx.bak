@@ -1,4 +1,4 @@
-﻿/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @next/next/no-img-element */
 /* eslint-disable jsx-a11y/alt-text */
 /* eslint-disable react/no-unescaped-entities */
@@ -34,9 +34,9 @@ export default function ElevesPage() {
         try {
             const res = await axios.get(`${API}/eleves/?search=${search}`);
             setEleves(res.data);
-            setCurrentPage(1); // Reset Ã  la page 1 lors d'une recherche
+            setCurrentPage(1); // Reset à la page 1 lors d'une recherche
         } 
-        catch (error) { console.error("Erreur chargement Ã©lÃ¨ves:", error);}
+        catch (error) { console.error("Erreur chargement élèves:", error);}
     };
 
     useEffect(() => { fetchEleves(); }, [search]);
@@ -58,11 +58,11 @@ export default function ElevesPage() {
 
     // --- FONCTION EXPORT EXCEL ---
     const exportToExcel = () => {
-    // On prÃ©pare les donnÃ©es pour qu'elles soient lisibles (on nettoie les colonnes inutiles)
+    // On prépare les données pour qu'elles soient lisibles (on nettoie les colonnes inutiles)
         const dataToExport = eleves.map((e: any) => ({
             Matricule: e.matricule,
             Nom_Complet: e.fullname,
-            Sexe: e.sexe === 'M' ? 'Masculin' : 'FÃ©minin',
+            Sexe: e.sexe === 'M' ? 'Masculin' : 'Féminin',
             Date_Naissance: e.date_naissance,
             Lieu_Naissance: e.lieu_naissance,
             Pere: e.pere || 'N/A',
@@ -79,17 +79,17 @@ export default function ElevesPage() {
     const exportToPDF = () => {
         const doc = new jsPDF();
 
-        // En-tÃªte du PDF avec titre et date de gÃ©nÃ©ration
+        // En-tête du PDF avec titre et date de génération
         doc.setFontSize(10);
         doc.setTextColor(150);
         doc.text("M E P U A", 14, 15);
   
         // Titre du document
         doc.setFontSize(18);
-        doc.text("Liste des Ã‰lÃ¨ves", 14, 22);
+        doc.text("Liste des Élèves", 14, 22);
         doc.setFontSize(11);
         doc.setTextColor(100);
-        doc.text(`GÃ©nÃ©rÃ© le : ${new Date().toLocaleDateString('fr-FR')}`, 14, 30);
+        doc.text(`Généré le : ${new Date().toLocaleDateString('fr-FR')}`, 14, 30);
 
         // Configuration du tableau PDF
         autoTable(doc, {
@@ -99,20 +99,20 @@ export default function ElevesPage() {
                 e.matricule,
                 e.fullname,
                 e.sexe,
-                `${e.date_naissance} Ã  ${e.lieu_naissance || ''}`,
+                `${e.date_naissance} à ${e.lieu_naissance || ''}`,
                 `P: ${e.pere || '-'} / M: ${e.mere || '-'}`
             ]),
-            headStyles: { fillColor: [37, 99, 235] }, // Bleu correspondant Ã  ton thÃ¨me
+            headStyles: { fillColor: [37, 99, 235] }, // Bleu correspondant à ton thème
             styles: { fontSize: 8 },
             theme: 'striped',
             didDrawPage: (data) => {
-                // Ajout d'un pied de page avec numÃ©ro de page et total d'Ã©lÃ¨ves quand le tableau dÃ©passe une page et que le pied de page est dessinÃ© avec chaque page et un tiret de page
+                // Ajout d'un pied de page avec numéro de page et total d'élèves quand le tableau dépasse une page et que le pied de page est dessiné avec chaque page et un tiret de page
                 doc.setFontSize(10);
                 doc.setTextColor(150);
                 doc.text(`Page ${doc.getNumberOfPages()} - Total: ${eleves.length}`, 14, 290);
                 doc.setFontSize(10);
                 doc.setTextColor(150);
-                doc.text(`GÃ©nÃ©rÃ© le : ${new Date().toLocaleDateString('fr-FR')}`, 170, 290, { align: 'center' });
+                doc.text(`Généré le : ${new Date().toLocaleDateString('fr-FR')}`, 170, 290, { align: 'center' });
             }
         });
 
@@ -120,7 +120,7 @@ export default function ElevesPage() {
     };
     
     const handleEdit = (eleve: any) => {
-    setCurrentEleve(eleve); // C'est ici qu'on fixe la donnÃ©e
+    setCurrentEleve(eleve); // C'est ici qu'on fixe la donnée
     setIsModalOpen(true);
 };
     return (
@@ -132,7 +132,7 @@ export default function ElevesPage() {
                 <div className="flex-none">
                     <div className="flex justify-between items-center mb-2">
                         <div>
-                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Gestion des élèves</h1>
+                            <h1 className="text-2xl font-black text-slate-800 tracking-tight">Gestion des Élèves</h1>
                             <p className="text-sm text-slate-500 font-medium">Effectif actuel de l'établissement</p>
                         </div>
                         <button onClick={() => { setCurrentEleve(null); setIsModalOpen(true); }}
@@ -166,7 +166,6 @@ export default function ElevesPage() {
                                                 <button onClick={exportToPDF} className="flex items-center gap-2 px-4 py-2 bg-rose-600 text-white rounded-xl text-sm font-bold"><FileText size={16} /> PDF</button>
                                             </div>
                 </div>                      
-                </div>
 
                 {/* CONTENEUR TABLEAU SCROLLABLE */}
                 <div className="bg-white rounded-2xl shadow-sm border border-slate-100">
@@ -206,25 +205,25 @@ export default function ElevesPage() {
                                     <td className="p-4 text-slate-600 text-sm">
                                         {(() => {
                                             const { jour_naissance: j, mois_naissance: m, annee_naissance: a } = eleve;                              
-                                            // Cas 1 : Tout est connu (diffÃ©rent de 0)
+                                            // Cas 1 : Tout est connu (différent de 0)
                                             if (j > 0 && m > 0 && a > 0) {
                                                 return `${j.toString().padStart(2, '0')}/${m.toString().padStart(2, '0')}/${a}`;                                            
                                             }                                                                            
-                                            // Cas 2 : Jour inconnu, mais mois et annÃ©e connus                                        
+                                            // Cas 2 : Jour inconnu, mais mois et année connus                                        
                                             if (m > 0 && a > 0) {                                            
                                                 const moisNom = new Date(2000, m - 1).toLocaleDateString('fr-FR', { month: 'long' });                                            
                                                 return `${moisNom.charAt(0).toUpperCase() + moisNom.slice(1)} ${a}`;                                            
                                             }                                      
-                                            // Cas 3 : Seule l'annÃ©e est connue                                        
+                                            // Cas 3 : Seule l'année est connue                                        
                                             if (a > 0) {                                            
                                                 return `En ${a}`;                                            
                                             }
                                             // Sinon
-                                            return "";
+                                            return "N/A";
                                         
                                         })()}
 
-                                        {eleve.lieu_naissance && ` À ${eleve.lieu_naissance}`}
+                                        {eleve.lieu_naissance && ` à ${eleve.lieu_naissance}`}
                                       
                                     </td>
                                     <td className="p-3 text-slate-500 text-xs">
@@ -269,7 +268,7 @@ export default function ElevesPage() {
                     {/* BARRE DE PAGINATION (Fixe au bas du tableau) */}
                     <div className="flex-none p-4 border-t border-slate-100 bg-slate-50/50 flex justify-between items-center">
                         <p className="text-xs text-slate-500 font-medium">
-                            Affichage de <span className="text-slate-800">{indexOfFirstItem + 1}</span> Ã  <span className="text-slate-800">{Math.min(indexOfLastItem, eleves.length)}</span> sur <span className="text-slate-800">{eleves.length}</span> Ã©lÃ¨ves
+                            Affichage de <span className="text-slate-800">{indexOfFirstItem + 1}</span> à <span className="text-slate-800">{Math.min(indexOfLastItem, eleves.length)}</span> sur <span className="text-slate-800">{eleves.length}</span> élèves
                         </p>
                         <div className="flex gap-2">
                             <button disabled={currentPage === 1} onClick={() => setCurrentPage(p => p - 1)} className="p-2 border rounded-lg bg-white hover:bg-slate-50 disabled:opacity-50 transition-all">
