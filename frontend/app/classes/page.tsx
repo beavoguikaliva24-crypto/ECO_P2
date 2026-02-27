@@ -1,23 +1,13 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import AuthGuard from '@/components/AuthGuard';
-import StatEleve from './StatEleves';
-import StatAffectations from './StatAffectations';
-import StatRecouvrement from './StatRecouvrement';
-import StatsRecouvrementContainer from "./StatsRecouvrementContainer";
 import DashboardLayout from '../dashboard/layout';
 import { 
   Plus, Edit, Search, Trash2, UserCircle, Users, ChevronLeft, ChevronRight, 
   FileSpreadsheet, FileText, Download } from 'lucide-react';
 
 
-export default function ClassesPage(){
-    const [eleves, setEleves] = useState([]); 
-    const [affectations, setAffectations] = useState([]);
-    const [recouvrements, setRecouvrements]= useState([]);
-    const [classes, setClasses] = useState([]);
-    const [loading, setLoading] = useState(true);   
+export default function ClassesPage(){ 
 
     /*if (loading) return <div className="p-10 text-center">Chargement des statistiques...</div>;*/
     return (

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 import React, { useEffect, useMemo, useState } from "react";
 import axios from "axios";
@@ -54,7 +55,7 @@ export default function RecouvrementModal({
     if (isOpen && recId && !rec?.affectation_details) {
       fetchRec();
     }
-  }, [isOpen, recId]); // volontairement pas `rec` pour éviter une boucle
+  }, [isOpen, recId, rec?.affectation_details]);
 
   // ----- 2) Form local: uniquement les champs éditables -----
   const [formData, setFormData] = useState<any>({});
